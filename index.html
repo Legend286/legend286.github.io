@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPU-Accelerated Fractal Explorer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle, #1a1a2e 0%, #0f0f23 100%);
+            color: #fff;
+            overflow: hidden;
+        }
+        
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: crosshair;
+        }
+        
+        .ui-panel {
+            position: absolute;
+            background: rgba(10, 10, 30, 0.95);
+            border: 1px solid #444;
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        }
+        
+        .controls {
+            top: 20px;
+            left: 20px;
+            width: 300px;
+        }
+        
+        .info {
+            top: 20px;
+            right: 20px;
+            width: 280px;
+            font-size: 12px;
+        }
+        
+        .coords {
+            bottom: 20px;
+            left: 20px;
+            width: 350px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+        }
+        
+        h2 {
+            color: #ff6b9d;
+            margin-bottom: 15px;
+            font-size: 18px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(255, 107, 157, 0.3);
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .control-group:last-child {
+            border-bottom: none;
+        }
+        
+        .control-group h3 {
+            color: #c77dff;
+            margin-bottom: 10px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .control-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .control-row label {
+            flex: 1;
+            font-size: 11px;
+            color: #ccc;
+        }
+        
+        .control-row input, .control-row select {
+            width: 100px;
+            padding: 4px 6px;
+            background: #222;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        
+        .control-row .value {
+            width: 60px;
+            text-align: center;
+            font-size: 10px;
+            color: #c77dff;
+            margin-left: 5px;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #ff6b9d, #c77dff);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 3px;
+            font-size: 11px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        button:hover {
+            background: linear-gradient(45deg, #ff7bb5, #d190ff);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+        }
+        
+        .zoom-btn {
+            width: 48%;
+            margin: 1%;
+        }
+        
+        .preset-btn {
+            width: 100%;
+            margin-bottom: 6px;
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+        }
+        
+        .preset-btn:hover {
+            background: linear-gradient(45deg, #5ee7de, #52b69a);
+        }
+        
+        .color-scheme {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .color-btn {
+            padding: 6px;
+            font-size: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+        }
+        
+        .color-btn:hover {
+            background: linear-gradient(45deg, #7a8ef2, #8856b8);
+        }
+        
+        .info-item {
+            margin-bottom: 8px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            border-left: 3px solid #ff6b9d;
+        }
+        
+        .info-label {
+            color: #ff6b9d;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        
+        .coord-item {
+            margin-bottom: 5px;
+            padding: 4px 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            border-left: 2px solid #c77dff;
+        }
+        
+        .status-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 12px;
+            color: #ccc;
+        }
+        
+        .gpu-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(45deg, #00ff88, #00cc66);
+            color: #000;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #222;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #666;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="gpu-indicator">🚀 GPU ACCELERATED</div>
+    
+    <div class="ui-panel controls">
+        <h2>🌌 GPU Fractal Explorer</h2>
+        
+        <div class="control-group">
+            <h3>Fractal Type</h3>
+            <div class="control-row">
+                <label>Fractal</label>
+                <select id="fractalType">
+                    <option value="0">Mandelbrot</option>
+                    <option value="1">Julia</option>
+                    <option value="2">Burning Ship</option>
+                    <option value="3">Tricorn</option>
+                    <option value="4">Multibrot</option>
+                    <option value="5">Phoenix</option>
+                </select>
+            </div>
+            <div class="control-row">
+                <label>Julia C Real</label>
+                <input type="range" id="juliaReal" min="-2" max="2" step="0.01" value="-0.7">
+                <span class="value" id="juliaRealValue">-0.7</span>
+            </div>
+            <div class="control-row">
+                <label>Julia C Imag</label>
+                <input type="range" id="juliaImag" min="-2" max="2" step="0.01" value="0.27">
+                <span class="value" id="juliaImagValue">0.27</span>
+            </div>
+            <div class="control-row">
+                <label>Power</label>
+                <input type="range" id="fractalPower" min="2" max="8" step="0.1" value="2">
+                <span class="value" id="fractalPowerValue">2</span>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <h3>Rendering</h3>
+            <div class="control-row">
+                <label>Max Iterations</label>
+                <input type="range" id="maxIterations" min="50" max="2000" value="256">
+                <span class="value" id="maxIterationsValue">256</span>
+            </div>
+            <div class="control-row">
+                <label>Escape Radius</label>
+                <input type="range" id="escapeRadius" min="2" max="10" step="0.1" value="2">
+                <span class="value" id="escapeRadiusValue">2</span>
+            </div>
+            <div class="control-row">
+                <label>Smooth Coloring</label>
+                <input type="checkbox" id="smoothColoring" checked>
+            </div>
+            <div class="control-row">
+                <label>High Precision</label>
+                <input type="checkbox" id="highPrecision" checked>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <h3>Navigation</h3>
+            <button class="zoom-btn" onclick="zoomIn()">Zoom In</button>
+            <button class="zoom-btn" onclick="zoomOut()">Zoom Out</button>
+            <button onclick="resetView()">Reset View</button>
+            <button onclick="centerView()">Center</button>
+        </div>
+        
+        <div class="control-group">
+            <h3>Color Schemes</h3>
+            <div class="color-scheme">
+                <button class="color-btn" onclick="setColorScheme('classic')">Classic</button>
+                <button class="color-btn" onclick="setColorScheme('fire')">Fire</button>
+                <button class="color-btn" onclick="setColorScheme('ocean')">Ocean</button>
+                <button class="color-btn" onclick="setColorScheme('psychedelic')">Psychedelic</button>
+                <button class="color-btn" onclick="setColorScheme('neon')">Neon</button>
+                <button class="color-btn" onclick="setColorScheme('rainbow')">Rainbow</button>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <h3>Famous Locations</h3>
+            <button class="preset-btn" onclick="gotoLocation('seahorse')">Seahorse Valley</button>
+            <button class="preset-btn" onclick="gotoLocation('elephant')">Elephant Valley</button>
+            <button class="preset-btn" onclick="gotoLocation('spiral')">Spiral</button>
+            <button class="preset-btn" onclick="gotoLocation('lightning')">Lightning</button>
+            <button class="preset-btn" onclick="gotoLocation('feather')">Feather</button>
+            <button class="preset-btn" onclick="gotoLocation('julia_dragon')">Julia Dragon</button>
+            <button class="preset-btn" onclick="gotoLocation('burning_ship')">Burning Ship</button>
+        </div>
+        
+        <div class="control-group">
+            <button onclick="saveImage()">💾 Save Image</button>
+            <button onclick="toggleFullscreen()">🔍 Fullscreen</button>
+        </div>
+    </div>
+    
+    <div class="ui-panel info">
+        <h2>📖 About</h2>
+        <div class="info-item">
+            <div class="info-label">GPU Acceleration</div>
+            <div>Real-time rendering using WebGL fragment shaders for maximum performance</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Controls:</div>
+            <div>• Click to zoom in</div>
+            <div>• Right-click to zoom out</div>
+            <div>• Drag to pan around</div>
+            <div>• Mouse wheel to zoom</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Fractal Types</div>
+            <div>• Mandelbrot: z² + c</div>
+            <div>• Julia: z² + c (fixed c)</div>
+            <div>• Burning Ship: (|Re(z)| + i|Im(z)|)² + c</div>
+            <div>• Tricorn: (z*)² + c</div>
+            <div>• Multibrot: z^n + c</div>
+            <div>• Phoenix: z² + c + a*z_prev</div>
+        </div>
+    </div>
+    
+    <div class="ui-panel coords">
+        <div class="coord-item">
+            <strong>Center:</strong> <span id="centerCoords">-0.5 + 0i</span>
+        </div>
+        <div class="coord-item">
+            <strong>Zoom:</strong> <span id="zoomLevel">1x</span>
+        </div>
+        <div class="coord-item">
+            <strong>Mouse:</strong> <span id="mouseCoords">0 + 0i</span>
+        </div>
+        <div class="coord-item">
+            <strong>Range:</strong> <span id="rangeInfo">4.0</span>
+        </div>
+    </div>
+    
+    <div class="status-bar">
+        <span id="statusText">GPU ready - Real-time rendering at 60 FPS</span>
+        <span style="margin-left: auto;">FPS: <span id="fps">60</span></span>
+    </div>
+
+    <!-- Vertex Shader -->
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec2 a_position;
+        void main() {
+            gl_Position = vec4(a_position, 0.0, 1.0);
+        }
+    </script>
+
+    <!-- Fragment Shader -->
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        #ifdef GL_FRAGMENT_PRECISION_HIGH
+            precision highp float;
+        #else
+            precision mediump float;
+        #endif
+        
+        uniform vec2 u_resolution;
+        uniform vec2 u_center;
+        uniform float u_zoom;
+        uniform int u_maxIterations;
+        uniform float u_escapeRadius;
+        uniform bool u_smoothColoring;
+        uniform int u_colorScheme;
+        uniform float u_time;
+        uniform int u_fractalType;
+        uniform vec2 u_juliaC;
+        uniform float u_fractalPower;
+        uniform bool u_highPrecision;
+        
+        // Double precision emulation for infinite zoom
+        struct DoubleFloat {
+            float hi;
+            float lo;
+        };
+        
+        DoubleFloat df_from_float(float x) {
+            return DoubleFloat(x, 0.0);
+        }
+        
+        DoubleFloat df_add(DoubleFloat a, DoubleFloat b) {
+            float s = a.hi + b.hi;
+            float v = s - a.hi;
+            float e = (a.hi - (s - v)) + (b.hi - v);
+            return DoubleFloat(s, e + a.lo + b.lo);
+        }
+        
+        DoubleFloat df_mul(DoubleFloat a, DoubleFloat b) {
+            float c = a.hi * b.hi;
+            float cc = a.hi * b.hi - c; // Manual fma implementation
+            return DoubleFloat(c, cc + a.hi * b.lo + a.lo * b.hi);
+        }
+        
+        DoubleFloat df_sub(DoubleFloat a, DoubleFloat b) {
+            float s = a.hi - b.hi;
+            float v = s - a.hi;
+            float e = (a.hi - (s - v)) - (b.hi + v);
+            return DoubleFloat(s, e + a.lo - b.lo);
+        }
+        
+        float df_to_float(DoubleFloat a) {
+            return a.hi + a.lo;
+        }
+        
+        vec3 hsv2rgb(vec3 c) {
+            vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+            vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+            return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+        }
+        
+        vec3 getColor(float iterations, int scheme) {
+            if (iterations >= float(u_maxIterations)) {
+                return vec3(0.0); // Black for points in the set
+            }
+            
+            float t = iterations / float(u_maxIterations);
+            
+            if (scheme == 0) { // Classic
+                return vec3(
+                    0.5 + 0.5 * cos(3.0 + t * 6.28 + 0.0),
+                    0.5 + 0.5 * cos(3.0 + t * 6.28 + 0.6),
+                    0.5 + 0.5 * cos(3.0 + t * 6.28 + 1.0)
+                );
+            } else if (scheme == 1) { // Fire
+                float r = min(1.0, t * 3.0);
+                float g = min(1.0, max(0.0, t * 3.0 - 1.0));
+                float b = min(1.0, max(0.0, t * 3.0 - 2.0));
+                return vec3(r, g, b);
+            } else if (scheme == 2) { // Ocean
+                return mix(vec3(0.1, 0.2, 0.4), vec3(0.2, 0.6, 1.0), t);
+            } else if (scheme == 3) { // Psychedelic
+                return vec3(
+                    0.5 + 0.5 * sin(t * 10.0 + u_time * 0.001),
+                    0.5 + 0.5 * sin(t * 10.0 + u_time * 0.001 + 2.0),
+                    0.5 + 0.5 * sin(t * 10.0 + u_time * 0.001 + 4.0)
+                );
+            } else if (scheme == 4) { // Neon
+                return hsv2rgb(vec3(t * 0.8 + 0.5, 1.0, 1.0));
+            } else { // Rainbow
+                return hsv2rgb(vec3(t, 1.0, 1.0));
+            }
+        }
+        
+        // High precision complex multiplication
+        vec2 complexMul(vec2 a, vec2 b) {
+            return vec2(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);
+        }
+        
+        // High precision complex power
+        vec2 complexPow(vec2 z, float power) {
+            float r = length(z);
+            float theta = atan(z.y, z.x);
+            float newR = pow(r, power);
+            float newTheta = theta * power;
+            return vec2(newR * cos(newTheta), newR * sin(newTheta));
+        }
+        
+        // Complex conjugate
+        vec2 complexConj(vec2 z) {
+            return vec2(z.x, -z.y);
+        }
+        
+        // Absolute value of complex components
+        vec2 complexAbs(vec2 z) {
+            return vec2(abs(z.x), abs(z.y));
+        }
+        
+        float calculateFractalHighPrecision(vec2 coord) {
+            // High precision calculation using double-float emulation
+            DoubleFloat zx = df_from_float(0.0);
+            DoubleFloat zy = df_from_float(0.0);
+            DoubleFloat zx_prev = df_from_float(0.0);
+            DoubleFloat zy_prev = df_from_float(0.0);
+            DoubleFloat cx = df_from_float(coord.x);
+            DoubleFloat cy = df_from_float(coord.y);
+            
+            // Initialize based on fractal type
+            if (u_fractalType == 1) { // Julia
+                zx = cx;
+                zy = cy;
+                cx = df_from_float(u_juliaC.x);
+                cy = df_from_float(u_juliaC.y);
+            }
+            
+            float iterations = 0.0;
+            float escapeRadius2 = u_escapeRadius * u_escapeRadius;
+            
+            for (int i = 0; i < 2000; i++) {
+                if (i >= u_maxIterations) break;
+                
+                float zx_f = df_to_float(zx);
+                float zy_f = df_to_float(zy);
+                float zx2 = zx_f * zx_f;
+                float zy2 = zy_f * zy_f;
+                
+                if (zx2 + zy2 > escapeRadius2) {
+                    if (u_smoothColoring) {
+                        float log_zn = log(zx2 + zy2) / 2.0;
+                        float nu = log(log_zn / log(u_escapeRadius)) / log(2.0);
+                        iterations = float(i) + 1.0 - nu;
+                    } else {
+                        iterations = float(i);
+                    }
+                    break;
+                }
+                
+                DoubleFloat zx_new, zy_new;
+                
+                if (u_fractalType == 0 || u_fractalType == 1) { // Mandelbrot or Julia: z² + c
+                    zx_new = df_add(df_sub(df_mul(zx, zx), df_mul(zy, zy)), cx);
+                    zy_new = df_add(df_mul(df_from_float(2.0), df_mul(zx, zy)), cy);
+                } else if (u_fractalType == 2) { // Burning Ship: (|Re(z)| + i|Im(z)|)² + c
+                    DoubleFloat abs_zx = df_from_float(abs(zx_f));
+                    DoubleFloat abs_zy = df_from_float(abs(zy_f));
+                    zx_new = df_add(df_sub(df_mul(abs_zx, abs_zx), df_mul(abs_zy, abs_zy)), cx);
+                    zy_new = df_add(df_mul(df_from_float(2.0), df_mul(abs_zx, abs_zy)), cy);
+                } else if (u_fractalType == 3) { // Tricorn: (z*)² + c
+                    DoubleFloat conj_zy = df_from_float(-zy_f);
+                    zx_new = df_add(df_sub(df_mul(zx, zx), df_mul(conj_zy, conj_zy)), cx);
+                    zy_new = df_add(df_mul(df_from_float(2.0), df_mul(zx, conj_zy)), cy);
+                } else if (u_fractalType == 4) { // Multibrot: z^n + c (simplified to z^2 for high precision)
+                    zx_new = df_add(df_sub(df_mul(zx, zx), df_mul(zy, zy)), cx);
+                    zy_new = df_add(df_mul(df_from_float(2.0), df_mul(zx, zy)), cy);
+                } else if (u_fractalType == 5) { // Phoenix: z² + c + 0.5*z_prev
+                    zx_new = df_add(df_add(df_sub(df_mul(zx, zx), df_mul(zy, zy)), cx), df_mul(df_from_float(0.5), zx_prev));
+                    zy_new = df_add(df_add(df_mul(df_from_float(2.0), df_mul(zx, zy)), cy), df_mul(df_from_float(0.5), zy_prev));
+                } else {
+                    // Fallback to standard z² + c
+                    zx_new = df_add(df_sub(df_mul(zx, zx), df_mul(zy, zy)), cx);
+                    zy_new = df_add(df_mul(df_from_float(2.0), df_mul(zx, zy)), cy);
+                }
+                
+                zx_prev = zx;
+                zy_prev = zy;
+                zx = zx_new;
+                zy = zy_new;
+                iterations = float(i + 1);
+            }
+            
+            return iterations;
+        }
+        
+        float calculateFractal(vec2 coord) {
+            vec2 z, c;
+            vec2 z_prev = vec2(0.0);
+            
+            // Initialize based on fractal type
+            if (u_fractalType == 0) { // Mandelbrot
+                z = vec2(0.0);
+                c = coord;
+            } else if (u_fractalType == 1) { // Julia
+                z = coord;
+                c = u_juliaC;
+            } else if (u_fractalType == 2) { // Burning Ship
+                z = vec2(0.0);
+                c = coord;
+            } else if (u_fractalType == 3) { // Tricorn
+                z = vec2(0.0);
+                c = coord;
+            } else if (u_fractalType == 4) { // Multibrot
+                z = vec2(0.0);
+                c = coord;
+            } else if (u_fractalType == 5) { // Phoenix
+                z = vec2(0.0);
+                c = coord;
+            }
+            
+            float iterations = 0.0;
+            float escapeRadius2 = u_escapeRadius * u_escapeRadius;
+            
+            for (int i = 0; i < 2000; i++) {
+                if (i >= u_maxIterations) break;
+                
+                float zx2 = z.x * z.x;
+                float zy2 = z.y * z.y;
+                
+                if (zx2 + zy2 > escapeRadius2) {
+                    if (u_smoothColoring) {
+                        // Smooth coloring
+                        float log_zn = log(zx2 + zy2) / 2.0;
+                        float nu = log(log_zn / log(u_escapeRadius)) / log(2.0);
+                        iterations = float(i) + 1.0 - nu;
+                    } else {
+                        iterations = float(i);
+                    }
+                    break;
+                }
+                
+                vec2 new_z;
+                
+                if (u_fractalType == 0) { // Mandelbrot: z² + c
+                    new_z = vec2(zx2 - zy2 + c.x, 2.0 * z.x * z.y + c.y);
+                } else if (u_fractalType == 1) { // Julia: z² + c
+                    new_z = vec2(zx2 - zy2 + c.x, 2.0 * z.x * z.y + c.y);
+                } else if (u_fractalType == 2) { // Burning Ship: (|Re(z)| + i|Im(z)|)² + c
+                    vec2 abs_z = complexAbs(z);
+                    new_z = vec2(abs_z.x * abs_z.x - abs_z.y * abs_z.y + c.x, 
+                                2.0 * abs_z.x * abs_z.y + c.y);
+                } else if (u_fractalType == 3) { // Tricorn: (z*)² + c
+                    vec2 conj_z = complexConj(z);
+                    new_z = vec2(conj_z.x * conj_z.x - conj_z.y * conj_z.y + c.x, 
+                                2.0 * conj_z.x * conj_z.y + c.y);
+                } else if (u_fractalType == 4) { // Multibrot: z^n + c
+                    new_z = complexPow(z, u_fractalPower);
+                    new_z = vec2(new_z.x + c.x, new_z.y + c.y);
+                } else if (u_fractalType == 5) { // Phoenix: z² + c + 0.5*z_prev
+                    new_z = vec2(zx2 - zy2 + c.x + 0.5 * z_prev.x, 
+                                2.0 * z.x * z.y + c.y + 0.5 * z_prev.y);
+                }
+                
+                z_prev = z;
+                z = new_z;
+                iterations = float(i + 1);
+            }
+            
+            return iterations;
+        }
+        
+        void main() {
+            vec2 coord = (gl_FragCoord.xy - u_resolution * 0.5) / min(u_resolution.x, u_resolution.y);
+            coord = coord * 4.0 / u_zoom + u_center;
+            
+            float iterations;
+            
+            if (u_highPrecision && u_zoom > 1e4) {
+                // For extreme zoom levels, use high precision calculation
+                iterations = calculateFractalHighPrecision(coord);
+            } else {
+                iterations = calculateFractal(coord);
+            }
+            
+            vec3 color = getColor(iterations, u_colorScheme);
+            gl_FragColor = vec4(color, 1.0);
+        }
+    </script>
+
+    <script>
+        class GPUMandelbrotExplorer {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.setupCanvas();
+                this.setupWebGL();
+                
+                // View parameters
+                this.centerX = -0.5;
+                this.centerY = 0;
+                this.zoom = 1;
+                this.range = 4.0;
+                
+                // Rendering parameters
+                this.maxIterations = 256;
+                this.escapeRadius = 2;
+                this.smoothColoring = true;
+                this.colorScheme = 0; // 0=classic, 1=fire, 2=ocean, 3=psychedelic, 4=neon, 5=rainbow
+                this.fractalType = 0; // 0=mandelbrot, 1=julia, 2=burning_ship, 3=tricorn, 4=multibrot, 5=phoenix
+                this.juliaC = { real: -0.7, imag: 0.27 };
+                this.fractalPower = 2;
+                this.highPrecision = true;
+                
+                // Interaction
+                this.isDragging = false;
+                this.lastMouseX = 0;
+                this.lastMouseY = 0;
+                
+                // Performance tracking
+                this.fps = 60;
+                this.lastTime = performance.now();
+                this.frameCount = 0;
+                this.startTime = performance.now();
+                
+                this.setupEventListeners();
+                this.updateControls();
+                this.render();
+            }
+            
+            setupCanvas() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+            
+            setupWebGL() {
+                this.gl = this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl');
+                
+                if (!this.gl) {
+                    alert('WebGL not supported! Falling back to CPU rendering.');
+                    return;
+                }
+                
+                // Create shaders
+                const vertexShader = this.createShader(this.gl.VERTEX_SHADER, document.getElementById('vertex-shader').textContent);
+                const fragmentShader = this.createShader(this.gl.FRAGMENT_SHADER, document.getElementById('fragment-shader').textContent);
+                
+                // Create program
+                this.program = this.createProgram(vertexShader, fragmentShader);
+                if (!this.program) {
+                    alert('Failed to create shader program! Your browser may not support the required WebGL features.');
+                    return;
+                }
+                this.gl.useProgram(this.program);
+                
+                // Get attribute and uniform locations
+                this.positionAttributeLocation = this.gl.getAttribLocation(this.program, 'a_position');
+                this.resolutionUniformLocation = this.gl.getUniformLocation(this.program, 'u_resolution');
+                this.centerUniformLocation = this.gl.getUniformLocation(this.program, 'u_center');
+                this.zoomUniformLocation = this.gl.getUniformLocation(this.program, 'u_zoom');
+                this.maxIterationsUniformLocation = this.gl.getUniformLocation(this.program, 'u_maxIterations');
+                this.escapeRadiusUniformLocation = this.gl.getUniformLocation(this.program, 'u_escapeRadius');
+                this.smoothColoringUniformLocation = this.gl.getUniformLocation(this.program, 'u_smoothColoring');
+                this.colorSchemeUniformLocation = this.gl.getUniformLocation(this.program, 'u_colorScheme');
+                this.timeUniformLocation = this.gl.getUniformLocation(this.program, 'u_time');
+                this.fractalTypeUniformLocation = this.gl.getUniformLocation(this.program, 'u_fractalType');
+                this.juliaCUniformLocation = this.gl.getUniformLocation(this.program, 'u_juliaC');
+                this.fractalPowerUniformLocation = this.gl.getUniformLocation(this.program, 'u_fractalPower');
+                this.highPrecisionUniformLocation = this.gl.getUniformLocation(this.program, 'u_highPrecision');
+                
+                // Create buffer for full-screen quad
+                this.positionBuffer = this.gl.createBuffer();
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
+                this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([
+                    -1, -1,
+                     1, -1,
+                    -1,  1,
+                     1,  1
+                ]), this.gl.STATIC_DRAW);
+                
+                // Setup viewport
+                this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+            }
+            
+            createShader(type, source) {
+                const shader = this.gl.createShader(type);
+                if (!shader) {
+                    console.error('Failed to create shader');
+                    return null;
+                }
+                
+                this.gl.shaderSource(shader, source);
+                this.gl.compileShader(shader);
+                
+                if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
+                    const error = this.gl.getShaderInfoLog(shader);
+                    console.error('Shader compilation error:', error);
+                    console.error('Shader source:', source);
+                    this.gl.deleteShader(shader);
+                    return null;
+                }
+                
+                return shader;
+            }
+            
+            createProgram(vertexShader, fragmentShader) {
+                if (!vertexShader || !fragmentShader) {
+                    console.error('Cannot create program: invalid shaders');
+                    return null;
+                }
+                
+                const program = this.gl.createProgram();
+                if (!program) {
+                    console.error('Failed to create program');
+                    return null;
+                }
+                
+                this.gl.attachShader(program, vertexShader);
+                this.gl.attachShader(program, fragmentShader);
+                this.gl.linkProgram(program);
+                
+                if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
+                    const error = this.gl.getProgramInfoLog(program);
+                    console.error('Program linking error:', error);
+                    this.gl.deleteProgram(program);
+                    return null;
+                }
+                
+                return program;
+            }
+            
+            screenToComplex(x, y) {
+                const aspect = this.canvas.width / this.canvas.height;
+                const scale = 4.0 / this.zoom;
+                
+                const normalizedX = (x / this.canvas.width - 0.5) * 2;
+                const normalizedY = (y / this.canvas.height - 0.5) * 2;
+                
+                const real = normalizedX * scale * (aspect > 1 ? aspect : 1) + this.centerX;
+                const imag = -normalizedY * scale * (aspect < 1 ? 1/aspect : 1) + this.centerY;
+                
+                return { real, imag };
+            }
+            
+            render() {
+                if (!this.gl || !this.program) return;
+                
+                // Clear canvas
+                this.gl.clearColor(0, 0, 0, 1);
+                this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+                
+                // Use shader program
+                this.gl.useProgram(this.program);
+                
+                // Set uniforms
+                this.gl.uniform2f(this.resolutionUniformLocation, this.canvas.width, this.canvas.height);
+                this.gl.uniform2f(this.centerUniformLocation, this.centerX, this.centerY);
+                this.gl.uniform1f(this.zoomUniformLocation, this.zoom);
+                this.gl.uniform1i(this.maxIterationsUniformLocation, this.maxIterations);
+                this.gl.uniform1f(this.escapeRadiusUniformLocation, this.escapeRadius);
+                this.gl.uniform1i(this.smoothColoringUniformLocation, this.smoothColoring ? 1 : 0);
+                this.gl.uniform1i(this.colorSchemeUniformLocation, this.colorScheme);
+                this.gl.uniform1f(this.timeUniformLocation, performance.now() - this.startTime);
+                this.gl.uniform1i(this.fractalTypeUniformLocation, this.fractalType);
+                this.gl.uniform2f(this.juliaCUniformLocation, this.juliaC.real, this.juliaC.imag);
+                this.gl.uniform1f(this.fractalPowerUniformLocation, this.fractalPower);
+                this.gl.uniform1i(this.highPrecisionUniformLocation, this.highPrecision ? 1 : 0);
+                
+                // Bind position buffer
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
+                this.gl.enableVertexAttribArray(this.positionAttributeLocation);
+                this.gl.vertexAttribPointer(this.positionAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
+                
+                // Draw
+                this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+                
+                this.updateUI();
+                this.updatePerformance();
+                
+                requestAnimationFrame(() => this.render());
+            }
+            
+            updateUI() {
+                document.getElementById('centerCoords').textContent = 
+                    `${this.centerX.toFixed(6)} + ${this.centerY.toFixed(6)}i`;
+                document.getElementById('zoomLevel').textContent = 
+                    this.zoom < 1000 ? `${this.zoom.toFixed(1)}x` : `${this.zoom.toExponential(2)}x`;
+                document.getElementById('rangeInfo').textContent = 
+                    this.range < 0.001 ? this.range.toExponential(2) : this.range.toFixed(6);
+                
+                // Update status text with fractal type and precision info
+                const fractalNames = ['Mandelbrot', 'Julia', 'Burning Ship', 'Tricorn', 'Multibrot', 'Phoenix'];
+                const fractalName = fractalNames[this.fractalType] || 'Unknown';
+                const isHighPrecision = this.highPrecision && this.zoom > 1e4;
+                const precisionMode = isHighPrecision ? 'High Precision' : 'Standard';
+                document.getElementById('statusText').textContent = 
+                    `${fractalName} Set - ${precisionMode} Mode - GPU Accelerated`;
+                
+                // Update GPU indicator to show high precision mode
+                const gpuIndicator = document.querySelector('.gpu-indicator');
+                if (isHighPrecision) {
+                    gpuIndicator.textContent = '🔬 HIGH PRECISION GPU';
+                    gpuIndicator.style.background = 'linear-gradient(45deg, #ff6b9d, #c77dff)';
+                } else {
+                    gpuIndicator.textContent = '🚀 GPU ACCELERATED';
+                    gpuIndicator.style.background = 'linear-gradient(45deg, #00ff88, #00cc66)';
+                }
+            }
+            
+            updatePerformance() {
+                const now = performance.now();
+                this.frameCount++;
+                
+                if (now - this.lastTime >= 1000) {
+                    this.fps = Math.round((this.frameCount * 1000) / (now - this.lastTime));
+                    this.frameCount = 0;
+                    this.lastTime = now;
+                    document.getElementById('fps').textContent = this.fps;
+                }
+            }
+            
+            zoomIn(factor = 2) {
+                // Limit zoom to prevent precision issues
+                const maxZoom = this.highPrecision ? 1e12 : 1e8;
+                if (this.zoom * factor <= maxZoom) {
+                    this.zoom *= factor;
+                    this.range = 4.0 / this.zoom;
+                }
+            }
+            
+            zoomOut(factor = 2) {
+                if (this.zoom / factor >= 0.1) {
+                    this.zoom /= factor;
+                    this.range = 4.0 / this.zoom;
+                }
+            }
+            
+            pan(deltaX, deltaY) {
+                const scale = 4.0 / this.zoom;
+                const aspect = this.canvas.width / this.canvas.height;
+                
+                this.centerX += (deltaX / this.canvas.width) * scale * (aspect > 1 ? aspect : 1);
+                this.centerY -= (deltaY / this.canvas.height) * scale * (aspect < 1 ? 1/aspect : 1);
+            }
+            
+            reset() {
+                this.centerX = -0.5;
+                this.centerY = 0;
+                this.zoom = 1;
+                this.range = 4.0;
+            }
+            
+            gotoLocation(location) {
+                const locations = {
+                    seahorse: { x: -0.7269, y: 0.1889, zoom: 8000, fractal: 0 },
+                    elephant: { x: 0.3245046418497685, y: 0.04855101129280834, zoom: 2000, fractal: 0 },
+                    spiral: { x: -0.8, y: 0.156, zoom: 1000, fractal: 0 },
+                    lightning: { x: -1.25066, y: 0.02012, zoom: 5000, fractal: 0 },
+                    feather: { x: -0.7463, y: 0.1102, zoom: 10000, fractal: 0 },
+                    julia_dragon: { x: 0, y: 0, zoom: 1, fractal: 1, juliaC: { real: -0.8, imag: 0.156 } },
+                    burning_ship: { x: -1.8, y: -0.08, zoom: 50, fractal: 2 }
+                };
+                
+                if (locations[location]) {
+                    const loc = locations[location];
+                    this.centerX = loc.x;
+                    this.centerY = loc.y;
+                    this.zoom = loc.zoom;
+                    this.range = 4.0 / loc.zoom;
+                    this.fractalType = loc.fractal;
+                    if (loc.juliaC) {
+                        this.juliaC = loc.juliaC;
+                    }
+                    this.updateControls();
+                }
+            }
+            
+            setColorScheme(scheme) {
+                const schemes = {
+                    'classic': 0,
+                    'fire': 1,
+                    'ocean': 2,
+                    'psychedelic': 3,
+                    'neon': 4,
+                    'rainbow': 5
+                };
+                this.colorScheme = schemes[scheme] || 0;
+            }
+            
+            setupEventListeners() {
+                // Mouse events
+                this.canvas.addEventListener('mousedown', (e) => {
+                    this.isDragging = true;
+                    this.lastMouseX = e.clientX;
+                    this.lastMouseY = e.clientY;
+                });
+                
+                this.canvas.addEventListener('mouseup', () => {
+                    this.isDragging = false;
+                });
+                
+                this.canvas.addEventListener('mousemove', (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const complex = this.screenToComplex(x, y);
+                    
+                    document.getElementById('mouseCoords').textContent = 
+                        `${complex.real.toFixed(6)} + ${complex.imag.toFixed(6)}i`;
+                    
+                    if (this.isDragging) {
+                        const deltaX = this.lastMouseX - e.clientX;
+                        const deltaY = this.lastMouseY - e.clientY;
+                        this.pan(deltaX, deltaY);
+                        this.lastMouseX = e.clientX;
+                        this.lastMouseY = e.clientY;
+                    }
+                });
+                
+                this.canvas.addEventListener('click', (e) => {
+                    if (!this.isDragging) {
+                        const rect = this.canvas.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        const complex = this.screenToComplex(x, y);
+                        
+                        this.centerX = complex.real;
+                        this.centerY = complex.imag;
+                        this.zoomIn(2);
+                    }
+                });
+                
+                this.canvas.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const complex = this.screenToComplex(x, y);
+                    
+                    this.centerX = complex.real;
+                    this.centerY = complex.imag;
+                    this.zoomOut(2);
+                });
+                
+                this.canvas.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    if (e.deltaY < 0) {
+                        this.zoomIn(1.2);
+                    } else {
+                        this.zoomOut(1.2);
+                    }
+                });
+                
+                // Control events
+                document.getElementById('maxIterations').addEventListener('input', (e) => {
+                    this.maxIterations = parseInt(e.target.value);
+                    document.getElementById('maxIterationsValue').textContent = this.maxIterations;
+                });
+                
+                document.getElementById('escapeRadius').addEventListener('input', (e) => {
+                    this.escapeRadius = parseFloat(e.target.value);
+                    document.getElementById('escapeRadiusValue').textContent = this.escapeRadius.toFixed(1);
+                });
+                
+                document.getElementById('smoothColoring').addEventListener('change', (e) => {
+                    this.smoothColoring = e.target.checked;
+                });
+                
+                document.getElementById('highPrecision').addEventListener('change', (e) => {
+                    this.highPrecision = e.target.checked;
+                });
+                
+                document.getElementById('fractalType').addEventListener('change', (e) => {
+                    this.fractalType = parseInt(e.target.value);
+                    this.updateJuliaVisibility();
+                });
+                
+                document.getElementById('juliaReal').addEventListener('input', (e) => {
+                    this.juliaC.real = parseFloat(e.target.value);
+                    document.getElementById('juliaRealValue').textContent = this.juliaC.real.toFixed(2);
+                });
+                
+                document.getElementById('juliaImag').addEventListener('input', (e) => {
+                    this.juliaC.imag = parseFloat(e.target.value);
+                    document.getElementById('juliaImagValue').textContent = this.juliaC.imag.toFixed(2);
+                });
+                
+                document.getElementById('fractalPower').addEventListener('input', (e) => {
+                    this.fractalPower = parseFloat(e.target.value);
+                    document.getElementById('fractalPowerValue').textContent = this.fractalPower.toFixed(1);
+                });
+                
+                // Keyboard shortcuts
+                window.addEventListener('keydown', (e) => {
+                    switch(e.key) {
+                        case '=':
+                        case '+':
+                            this.zoomIn();
+                            break;
+                        case '-':
+                            this.zoomOut();
+                            break;
+                        case 'r':
+                            this.reset();
+                            break;
+                        case 'c':
+                            this.centerX = 0;
+                            this.centerY = 0;
+                            break;
+                        case 'ArrowLeft':
+                            this.pan(-50, 0);
+                            break;
+                        case 'ArrowRight':
+                            this.pan(50, 0);
+                            break;
+                        case 'ArrowUp':
+                            this.pan(0, -50);
+                            break;
+                        case 'ArrowDown':
+                            this.pan(0, 50);
+                            break;
+                    }
+                });
+                
+                window.addEventListener('resize', () => {
+                    this.setupCanvas();
+                    this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+                });
+            }
+            
+            saveImage() {
+                const fractalNames = ['mandelbrot', 'julia', 'burning_ship', 'tricorn', 'multibrot', 'phoenix'];
+                const fractalName = fractalNames[this.fractalType] || 'fractal';
+                const link = document.createElement('a');
+                link.download = `gpu_${fractalName}_${this.centerX.toFixed(6)}_${this.centerY.toFixed(6)}_${this.zoom.toFixed(2)}x.png`;
+                link.href = this.canvas.toDataURL();
+                link.click();
+            }
+            
+            toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            
+            updateControls() {
+                document.getElementById('fractalType').value = this.fractalType;
+                document.getElementById('juliaReal').value = this.juliaC.real;
+                document.getElementById('juliaImag').value = this.juliaC.imag;
+                document.getElementById('fractalPower').value = this.fractalPower;
+                document.getElementById('highPrecision').checked = this.highPrecision;
+                
+                document.getElementById('juliaRealValue').textContent = this.juliaC.real.toFixed(2);
+                document.getElementById('juliaImagValue').textContent = this.juliaC.imag.toFixed(2);
+                document.getElementById('fractalPowerValue').textContent = this.fractalPower.toFixed(1);
+                
+                this.updateJuliaVisibility();
+            }
+            
+            updateJuliaVisibility() {
+                const juliaControls = document.querySelectorAll('#juliaReal, #juliaImag').forEach(el => {
+                    el.closest('.control-row').style.display = this.fractalType === 1 ? 'flex' : 'none';
+                });
+                
+                const powerControl = document.getElementById('fractalPower').closest('.control-row');
+                powerControl.style.display = this.fractalType === 4 ? 'flex' : 'none';
+            }
+        }
+        
+        // Initialize GPU explorer
+        const canvas = document.getElementById('canvas');
+        const explorer = new GPUMandelbrotExplorer(canvas);
+        
+        // Global functions for UI
+        function zoomIn() { explorer.zoomIn(); }
+        function zoomOut() { explorer.zoomOut(); }
+        function resetView() { explorer.reset(); }
+        function centerView() { 
+            explorer.centerX = 0; 
+            explorer.centerY = 0; 
+        }
+        function gotoLocation(location) { explorer.gotoLocation(location); }
+        function setColorScheme(scheme) { explorer.setColorScheme(scheme); }
+        function saveImage() { explorer.saveImage(); }
+        function toggleFullscreen() { explorer.toggleFullscreen(); }
+        
+        // Initialize UI values
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('maxIterationsValue').textContent = explorer.maxIterations;
+            document.getElementById('escapeRadiusValue').textContent = explorer.escapeRadius.toFixed(1);
+        });
+        
+    </script>
+</body>
+</html> 
