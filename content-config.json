@@ -1,0 +1,178 @@
+{
+  "site": {
+    "title": "KNOWN UNKNOWN ARCHIVE",
+    "subtitle": "BUREAU ARCHIVE NODE // DIGITAL PRESERVATION PROJECT",
+    "classification": "CLASSIFIED",
+    "clearance": "CLEARANCE LEVEL: PUBLIC ORIENTATION"
+  },
+  "navigation": {
+    "sections": [
+      {
+        "title": "ARCHIVE INDEX",
+        "items": [
+          {
+            "title": "Home // Overview",
+            "contentId": "home",
+            "fileNumber": "ARCHIVE OVERVIEW",
+            "fileName": "Home",
+            "active": true
+          },
+          {
+            "title": "File 0001 // Introduction",
+            "contentId": "first_lore_document",
+            "fileNumber": "FILE 0001",
+            "fileName": "Introductory Dossier"
+          },
+          {
+            "title": "Lore Dossier // Main Archive",
+            "contentId": "known_unknown_lore",
+            "fileNumber": "LORE DOSSIER",
+            "fileName": "Known Unknown Lore"
+          }
+        ]
+      },
+      {
+        "title": "SITE DOSSIERS",
+        "items": [
+          {
+            "title": "File 0024 // Redwood Deep",
+            "contentId": "redwood_deep_dossier",
+            "fileNumber": "FILE 0024",
+            "fileName": "Redwood Deep Site Dossier"
+          }
+        ]
+      },
+      {
+        "title": "ENTITY CLASSIFICATIONS",
+        "items": [
+          {
+            "title": "Riftborn Registry",
+            "disabled": true,
+            "description": "Cross-dimensional entities and temporal anomalies"
+          },
+          {
+            "title": "Lost Kin Database", 
+            "disabled": true,
+            "description": "Ancient creatures and cryptid classifications"
+          },
+          {
+            "title": "Unbound Archives",
+            "disabled": true,
+            "description": "Possessed humans and haunted objects"
+          }
+        ]
+      },
+      {
+        "title": "OPERATIONS",
+        "items": [
+          {
+            "title": "Black Site Registry",
+            "disabled": true,
+            "description": "Containment facilities and research installations"
+          },
+          {
+            "title": "Object Containment",
+            "disabled": true,
+            "description": "Anomalous artifacts and dangerous items"
+          },
+          {
+            "title": "Agent Reports",
+            "disabled": true,
+            "description": "Field reports and incident documentation"
+          }
+        ]
+      }
+    ]
+  },
+  "homeContent": {
+    "welcomeMessage": "WELCOME TO THE KNOWN UNKNOWN ARCHIVE",
+    "securityNotice": "This archive contains information about anomalous entities, locations, and phenomena. All content has been cleared for public dissemination under Protocol C-12.",
+    "contentCards": [
+      {
+        "title": "📋 INTRODUCTORY BRIEFING",
+        "description": "New to the Known Unknown phenomenon? Start here for basic orientation and classification protocols.",
+        "fileTag": "FILE 0001",
+        "target": "first_lore_document"
+      },
+      {
+        "title": "🗂️ MAIN ARCHIVE",
+        "description": "Complete lore dossier including factions, entities, timeline, and world overview.",
+        "fileTag": "COMPREHENSIVE",
+        "target": "known_unknown_lore"
+      },
+      {
+        "title": "🌲 REDWOOD DEEP",
+        "description": "Site dossier for anomalous ecological zone. Contains entity classifications and incident reports.",
+        "fileTag": "FILE 0024",
+        "target": "redwood_deep_dossier"
+      }
+    ],
+    "recentActivity": [
+      {
+        "date": "2024.12.XX",
+        "action": "CREATED",
+        "file": "Redwood Deep Site Dossier"
+      },
+      {
+        "date": "2024.12.XX", 
+        "action": "UPDATED",
+        "file": "Known Unknown Lore Database"
+      },
+      {
+        "date": "2024.12.XX",
+        "action": "INITIATED", 
+        "file": "Digital Archive Project"
+      }
+    ]
+  },
+  "searchIndex": {
+    "terms": {
+      "bureau": "known_unknown_lore",
+      "riftborn": "known_unknown_lore",
+      "lost kin": "known_unknown_lore",
+      "unbound": "known_unknown_lore",
+      "birchskin": "redwood_deep_dossier",
+      "doorlicker": "redwood_deep_dossier",
+      "redwood": "redwood_deep_dossier",
+      "forest": "redwood_deep_dossier",
+      "introduction": "first_lore_document",
+      "overview": "home",
+      "entities": "known_unknown_lore",
+      "cryptid": "redwood_deep_dossier",
+      "anomalous": "known_unknown_lore",
+      "classified": "home",
+      "dossier": "redwood_deep_dossier"
+    }
+  },
+  "templates": {
+    "siteDossier": {
+      "header": "**SITE DOSSIER: [SITE NAME]**\n\n**Location:** [LOCATION]\n**Designation:** [DESIGNATION]\n**Threat Tier:** [TIER]\n**Compiled by:** Bureau [DIVISION] // File [NUMBER]\n\n---\n\n### Overview\n\n[DESCRIPTION]\n\n---\n\n### Anomalous Activity Index\n\n- **[PHENOMENON 1]:** [DESCRIPTION]\n- **[PHENOMENON 2]:** [DESCRIPTION]\n\n---\n\n### Known Entities\n\n#### [Entity Name]\n- Classification: [TYPE]\n- Description: [DESCRIPTION]\n- Ability: [ABILITIES]\n\n---\n\n### Historical Incidents\n\n- **[YEAR]: [EVENT NAME]**\n  - [DESCRIPTION]\n\n---\n\n### Suppression Strategy\n\n- [STRATEGY 1]\n- [STRATEGY 2]\n\n---\n\n### Notes from the Archive\n\n> \"[QUOTE]\"\n> – [ATTRIBUTION]\n\n---\n**END OF FILE [NUMBER]**"
+    },
+    "entityFile": {
+      "header": "**ENTITY CLASSIFICATION: [ENTITY NAME]**\n\n**Classification:** [TYPE]\n**Threat Level:** [LEVEL] \n**Containment Priority:** [PRIORITY]\n**Compiled by:** Bureau [DIVISION] // File [NUMBER]\n\n---\n\n### Physical Description\n\n[DESCRIPTION]\n\n---\n\n### Behavioral Patterns\n\n[BEHAVIOR]\n\n---\n\n### Documented Encounters\n\n[ENCOUNTERS]\n\n---\n\n### Containment Protocols\n\n[PROTOCOLS]\n\n---\n**END OF FILE [NUMBER]**"
+    }
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2024-12-XX",
+    "contentManagement": {
+      "addNewDocument": {
+        "steps": [
+          "1. Create a new .md file with your content",
+          "2. Add entry to navigation.sections[].items in this config",
+          "3. Add search terms to searchIndex.terms if needed",
+          "4. Update homeContent.contentCards if it should appear on home page",
+          "5. The site will automatically load the new content"
+        ]
+      },
+      "fileNamingConvention": {
+        "pattern": "[name_with_underscores].md",
+        "examples": [
+          "black_site_11_dossier.md",
+          "operation_silence_report.md", 
+          "birchskin_entity_file.md"
+        ]
+      }
+    }
+  }
+} 
