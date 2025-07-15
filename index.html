@@ -26,11 +26,17 @@
                     <span class="classification-level">CLASSIFIED</span>
                     <span class="clearance-info">CLEARANCE LEVEL: PUBLIC ORIENTATION</span>
                 </div>
-                <h1 class="site-title">
-                    <span class="redacted">[REDACTED]</span>
-                    KNOWN UNKNOWN
-                    <span class="redacted">[REDACTED]</span>
-                </h1>
+                <div class="header-top">
+                    <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                        <span class="menu-icon">☰</span>
+                        MENU
+                    </button>
+                    <h1 class="site-title">
+                        <span class="redacted">[REDACTED]</span>
+                        KNOWN UNKNOWN
+                        <span class="redacted">[REDACTED]</span>
+                    </h1>
+                </div>
                 <p class="site-subtitle">BUREAU ARCHIVE NODE // DIGITAL PRESERVATION PROJECT</p>
                 <div class="search-container">
                     <input type="text" id="search-input" placeholder="Search archive..." class="search-input">
@@ -39,8 +45,12 @@
             </div>
         </header>
 
+        <!-- Mobile Overlay -->
+        <div class="mobile-overlay" id="mobile-overlay"></div>
+        
         <!-- Navigation Sidebar -->
         <nav class="sidebar" id="sidebar">
+            <button class="sidebar-close" id="sidebar-close">✕ CLOSE MENU</button>
             <div class="nav-section">
                 <h3 class="nav-title collapsible active" data-target="archive-index">
                     <span class="nav-icon">▼</span>
@@ -50,6 +60,7 @@
                     <li><a href="#" data-content="home" class="nav-link active">Home // Overview</a></li>
                     <li><a href="#" data-content="first_lore_document" class="nav-link">File 0001 // Introduction</a></li>
                     <li><a href="#" data-content="known_unknown_lore" class="nav-link">Lore Dossier // Main Archive</a></li>
+                    <li><a href="#" data-content="pre-history" class="nav-link">Era I // Prehistory Timeline</a></li>
                 </ul>
             </div>
             

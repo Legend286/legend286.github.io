@@ -46,6 +46,23 @@ class ArchiveSystem {
                 const header = e.target.classList.contains('collapsible') ? e.target : e.target.closest('.collapsible');
                 this.toggleNavSection(header);
             }
+
+            // Mobile menu toggle
+            if (e.target.id === 'mobile-menu-toggle') {
+                e.preventDefault();
+                this.toggleMobileMenu();
+            }
+
+            // Mobile menu close
+            if (e.target.id === 'sidebar-close' || e.target.id === 'mobile-overlay') {
+                e.preventDefault();
+                this.closeMobileMenu();
+            }
+
+            // Close mobile menu when nav link is clicked
+            if (e.target.classList.contains('nav-link') && !e.target.classList.contains('disabled')) {
+                this.closeMobileMenu();
+            }
         });
 
         // Search functionality
@@ -118,7 +135,7 @@ class ArchiveSystem {
                 this.displayContent(content);
                 this.updateFileInfo(this.getFileNumber(contentId), this.getFileName(contentId));
                 this.currentContent = contentId;
-            }, 8500); // Extended timeout for full typing + dot sequence + OK
+            }, 2500); // 2.5 seconds total loading time
             
         } catch (error) {
             console.error('Error loading content:', error);
@@ -166,6 +183,12 @@ class ArchiveSystem {
                             <h3>🌲 REDWOOD DEEP</h3>
                             <p>Site dossier for anomalous ecological zone. Contains entity classifications and incident reports.</p>
                             <span class="file-tag">FILE 0024</span>
+                        </div>
+                        
+                        <div class="content-card" data-target="pre-history">
+                            <h3>🗿 PREHISTORY TIMELINE</h3>
+                            <p>Era I chronological record of anomalous events from 6000 BCE to 0 CE. Ancient rift breaches and temporal artifacts.</p>
+                            <span class="file-tag">ERA I</span>
                         </div>
                     </div>
                 </section>
@@ -222,8 +245,8 @@ class ArchiveSystem {
         const loadingTextEl = document.getElementById('loading-text-animation');
         if (!loadingTextEl) return;
         
-        const baseText = 'ACCESSING ARCHIVE...';
-        const dotSequence = [' .', ' ..', ' ...', ' .', ' ..', ' ...', ' OK'];
+        const baseText = 'ACCESSING ARCHIVE';
+        const dotSequence = ['.', '..', '...', '.', '..', '...', ' OK'];
         let currentText = '';
         let index = 0;
         let dotIndex = 0;
@@ -231,24 +254,32 @@ class ArchiveSystem {
         
         const typeInterval = setInterval(() => {
             if (!isTypingDots && index < baseText.length) {
-                // Type the main text
+                // Type the main text (faster)
                 currentText += baseText[index];
                 loadingTextEl.textContent = currentText + (Math.random() > 0.5 ? '_' : '');
                 index++;
-            } else if (!isTypingDots) {
-                // Finished main text, start dot sequence
-                isTypingDots = true;
-                loadingTextEl.textContent = currentText; // Remove cursor
-            } else if (dotIndex < dotSequence.length) {
-                // Type the dot sequence
-                loadingTextEl.textContent = baseText + dotSequence[dotIndex];
-                dotIndex++;
-            } else {
-                // Finished everything
-                loadingTextEl.textContent = baseText + ' OK';
-                clearInterval(typeInterval);
+                
+                // Switch to dots timing after main text
+                if (index >= baseText.length) {
+                    setTimeout(() => {
+                        isTypingDots = true;
+                        loadingTextEl.textContent = baseText; // Remove cursor
+                        
+                        // Start dot sequence timing for 2.5s total
+                        const dotInterval = setInterval(() => {
+                            if (dotIndex < dotSequence.length) {
+                                loadingTextEl.textContent = baseText + dotSequence[dotIndex];
+                                dotIndex++;
+                            } else {
+                                clearInterval(dotInterval);
+                            }
+                        }, 175); // 175ms for each dot step (fits in remaining ~1.2s)
+                    }, 100);
+                    
+                    clearInterval(typeInterval);
+                }
             }
-        }, 300); // 300ms per step
+        }, 80); // 80ms per character for 2.5s total timing
     }
 
     displayContent(htmlContent) {
@@ -322,7 +353,8 @@ class ArchiveSystem {
         const fileNumbers = {
             'first_lore_document': 'FILE 0001',
             'known_unknown_lore': 'LORE DOSSIER',
-            'redwood_deep_dossier': 'FILE 0024'
+            'redwood_deep_dossier': 'FILE 0024',
+            'pre-history': 'ERA I TIMELINE'
         };
         return fileNumbers[contentId] || 'ARCHIVE FILE';
     }
@@ -331,7 +363,8 @@ class ArchiveSystem {
         const fileNames = {
             'first_lore_document': 'Introductory Dossier',
             'known_unknown_lore': 'Known Unknown Lore',
-            'redwood_deep_dossier': 'Redwood Deep Site Dossier'
+            'redwood_deep_dossier': 'Redwood Deep Site Dossier',
+            'pre-history': 'Prehistory Dossier'
         };
         return fileNames[contentId] || 'Unknown Document';
     }
@@ -354,8 +387,38 @@ class ArchiveSystem {
         html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
         html = html.replace(/`(.*?)`/g, '<code>$1</code>');
         
-        // Blockquotes
-        html = html.replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>');
+        // Blockquotes - handle multi-line quotes properly
+        html = html.replace(/^> (.*)$/gm, '|||BLOCKQUOTE|||$1');
+        
+        // Group consecutive blockquote lines
+        const lines = html.split('\n');
+        const processedLines = [];
+        let inBlockquote = false;
+        let blockquoteContent = [];
+        
+        for (let line of lines) {
+            if (line.startsWith('|||BLOCKQUOTE|||')) {
+                if (!inBlockquote) {
+                    inBlockquote = true;
+                }
+                blockquoteContent.push(line.replace('|||BLOCKQUOTE|||', ''));
+            } else {
+                if (inBlockquote) {
+                    // End of blockquote, process accumulated content
+                    processedLines.push('<blockquote>' + blockquoteContent.join('<br>') + '</blockquote>');
+                    blockquoteContent = [];
+                    inBlockquote = false;
+                }
+                processedLines.push(line);
+            }
+        }
+        
+        // Handle case where file ends with blockquote
+        if (inBlockquote && blockquoteContent.length > 0) {
+            processedLines.push('<blockquote>' + blockquoteContent.join('<br>') + '</blockquote>');
+        }
+        
+        html = processedLines.join('\n');
         
         // Lists
         html = html.replace(/^\- (.*$)/gm, '<li>$1</li>');
@@ -373,7 +436,7 @@ class ArchiveSystem {
         html = html.replace(/<p>(<h[1-6]>.*?<\/h[1-6]>)<\/p>/g, '$1');
         html = html.replace(/<p>(<hr>)<\/p>/g, '$1');
         html = html.replace(/<p>(<ul>.*?<\/ul>)<\/p>/s, '$1');
-        html = html.replace(/<p>(<blockquote>.*?<\/blockquote>)<\/p>/g, '$1');
+        html = html.replace(/<p>(<blockquote>.*?<\/blockquote>)<\/p>/gs, '$1');
         html = html.replace(/<p>(<pre>.*?<\/pre>)<\/p>/s, '$1');
         
         return html;
@@ -399,6 +462,11 @@ class ArchiveSystem {
         this.searchIndex.set('forest', 'redwood_deep_dossier');
         this.searchIndex.set('introduction', 'first_lore_document');
         this.searchIndex.set('overview', 'home');
+        this.searchIndex.set('prehistory', 'pre-history');
+        this.searchIndex.set('timeline', 'pre-history');
+        this.searchIndex.set('era i', 'pre-history');
+        this.searchIndex.set('ancient', 'pre-history');
+        this.searchIndex.set('temporal', 'pre-history');
     }
 
     performSearch() {
@@ -546,6 +614,36 @@ class ArchiveSystem {
             if (icon) {
                 icon.textContent = '▼';
             }
+        }
+    }
+
+    toggleMobileMenu() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobile-overlay');
+        
+        if (sidebar && overlay) {
+            const isActive = sidebar.classList.contains('mobile-active');
+            
+            if (isActive) {
+                this.closeMobileMenu();
+            } else {
+                sidebar.classList.add('mobile-active');
+                overlay.classList.add('active');
+                // Prevent body scroll when menu is open
+                document.body.style.overflow = 'hidden';
+            }
+        }
+    }
+
+    closeMobileMenu() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobile-overlay');
+        
+        if (sidebar && overlay) {
+            sidebar.classList.remove('mobile-active');
+            overlay.classList.remove('active');
+            // Restore body scroll
+            document.body.style.overflow = '';
         }
     }
 }

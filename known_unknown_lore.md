@@ -22,7 +22,7 @@ This is your entry point into the buried history of mankind:
 - The minds broken by contact with The Rift.
 - The unexplainable machines buzzing in your dreams.
 
-**KNOWN UNKNOWN** isn't just a card game — it’s a living conspiracy. A fractured puzzle of historical what-ifs, classified documents, and whispered warnings, all orbiting a shared, shifting narrative.
+**KNOWN UNKNOWN** isn't just a story — it’s a living conspiracy. A fractured puzzle of historical what-ifs, classified documents, and whispered warnings, all orbiting a shared, shifting narrative.
 
 > “They didn’t cover it up because it wasn’t real.
 > They covered it up because it wouldn’t go away.”

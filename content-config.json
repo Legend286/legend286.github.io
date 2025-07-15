@@ -28,6 +28,12 @@
             "contentId": "known_unknown_lore",
             "fileNumber": "LORE DOSSIER",
             "fileName": "Known Unknown Lore"
+          },
+          {
+            "title": "Era I // Prehistory Timeline",
+            "contentId": "pre-history",
+            "fileNumber": "ERA I TIMELINE",
+            "fileName": "Prehistory Dossier"
           }
         ]
       },
@@ -105,6 +111,12 @@
         "description": "Site dossier for anomalous ecological zone. Contains entity classifications and incident reports.",
         "fileTag": "FILE 0024",
         "target": "redwood_deep_dossier"
+      },
+      {
+        "title": "🗿 PREHISTORY TIMELINE",
+        "description": "Era I chronological record of anomalous events from 6000 BCE to 0 CE. Ancient rift breaches and temporal artifacts.",
+        "fileTag": "ERA I",
+        "target": "pre-history"
       }
     ],
     "recentActivity": [
@@ -141,7 +153,15 @@
       "cryptid": "redwood_deep_dossier",
       "anomalous": "known_unknown_lore",
       "classified": "home",
-      "dossier": "redwood_deep_dossier"
+      "dossier": "redwood_deep_dossier",
+      "prehistory": "pre-history",
+      "timeline": "pre-history",
+      "era i": "pre-history",
+      "ancient": "pre-history",
+      "rift breach": "pre-history",
+      "whispering tablets": "pre-history",
+      "black antlers": "pre-history",
+      "temporal": "pre-history"
     }
   },
   "templates": {
