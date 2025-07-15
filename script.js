@@ -65,6 +65,11 @@ class ArchiveSystem {
             }
         });
 
+        // Touch events for mobile improvement
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            this.setupTouchEvents();
+        }
+
         // Search functionality
         const searchInput = document.getElementById('search-input');
         const searchBtn = document.getElementById('search-btn');
@@ -78,9 +83,23 @@ class ArchiveSystem {
                     this.performSearch();
                 }
             });
+            
+            // Mobile keyboard optimization
+            searchInput.addEventListener('focus', () => {
+                // Small delay to allow keyboard to appear
+                setTimeout(() => {
+                    if (window.innerHeight < 500) {
+                        document.querySelector('.site-header').style.transform = 'translateY(-20px)';
+                    }
+                }, 300);
+            });
+            
+            searchInput.addEventListener('blur', () => {
+                document.querySelector('.site-header').style.transform = '';
+            });
         }
 
-        // Escape key to clear search
+        // Escape key to clear search and close mobile menu
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 const searchInput = document.getElementById('search-input');
@@ -88,8 +107,76 @@ class ArchiveSystem {
                     searchInput.value = '';
                 }
                 this.clearSearch();
+                this.closeMobileMenu();
             }
         });
+
+        // Handle orientation changes on mobile
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                this.closeMobileMenu();
+            }, 100);
+        });
+
+        // Handle resize for mobile optimization
+        window.addEventListener('resize', this.debounce(() => {
+            if (window.innerWidth > 768) {
+                this.closeMobileMenu();
+            }
+        }, 250));
+    }
+
+    setupTouchEvents() {
+        let startX = 0;
+        let startY = 0;
+        
+        // Swipe to open/close menu
+        document.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        }, { passive: true });
+        
+        document.addEventListener('touchmove', (e) => {
+            if (!startX || !startY) return;
+            
+            const diffX = e.touches[0].clientX - startX;
+            const diffY = e.touches[0].clientY - startY;
+            
+            // Only handle horizontal swipes
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                const sidebar = document.getElementById('sidebar');
+                if (!sidebar) return;
+                
+                const isMenuOpen = sidebar.classList.contains('mobile-active');
+                
+                // Swipe right to open menu (from left edge)
+                if (diffX > 50 && startX < 20 && !isMenuOpen) {
+                    this.toggleMobileMenu();
+                }
+                
+                // Swipe left to close menu
+                if (diffX < -50 && isMenuOpen) {
+                    this.closeMobileMenu();
+                }
+            }
+        }, { passive: true });
+        
+        document.addEventListener('touchend', () => {
+            startX = 0;
+            startY = 0;
+        }, { passive: true });
+    }
+
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
     }
 
     updateCurrentDate() {
@@ -629,8 +716,14 @@ class ArchiveSystem {
             } else {
                 sidebar.classList.add('mobile-active');
                 overlay.classList.add('active');
-                // Prevent body scroll when menu is open
+                // Prevent body scroll when menu is open (mobile optimization)
                 document.body.style.overflow = 'hidden';
+                document.body.style.position = 'fixed';
+                document.body.style.width = '100%';
+                
+                // Store scroll position for iOS
+                this.scrollPosition = window.pageYOffset;
+                document.body.style.top = `-${this.scrollPosition}px`;
             }
         }
     }
@@ -642,8 +735,17 @@ class ArchiveSystem {
         if (sidebar && overlay) {
             sidebar.classList.remove('mobile-active');
             overlay.classList.remove('active');
-            // Restore body scroll
+            
+            // Restore body scroll and position
             document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
+            document.body.style.top = '';
+            
+            // Restore scroll position for iOS
+            if (this.scrollPosition !== undefined) {
+                window.scrollTo(0, this.scrollPosition);
+            }
         }
     }
 }

@@ -29,7 +29,7 @@ These, and thousands more, are indexed beneath the KNOWN UNKNOWN protocol — fi
 
 ### Purpose of This Dossier
 
-This document is designed to introduce clearance-level-zero personnel — civilians, interns, low-threat agents — to the wider framework of anomaly classification. It may be distributed under supervised Bureau conditions or via approved ARG dissemination protocols (see: MEMETIC FILTER C-12).
+This document is designed to introduce clearance-level-zero personnel — civilians, interns, low-threat agents — to the wider framework of anomaly classification. It may be distributed under supervised Bureau conditions or via approved public dissemination protocols (see: MEMETIC FILTER C-12).
 
 By understanding the **patterns of absence** — the events and entities that persist despite deliberate erasure — we can begin to piece together the shape of the world we *were never meant to see*.
 

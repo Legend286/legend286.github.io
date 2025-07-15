@@ -14,15 +14,15 @@ But only some of it has been recovered.
 
 **KNOWN UNKNOWN** is a paranormal, conspiracy-infused alternate Earth setting blending modern folklore, shadow governments, haunted science, and interdimensional threats.
 
-You’ve stumbled into a world hidden behind redacted files, analog static, and the flicker of VHS footage. Here, nothing is entirely real — or fake. The truth is partitioned, archived, burned, then buried beneath a black site. What’s left is what they didn’t want you to see… or what refused to stay hidden.
+A world exists hidden behind redacted files, analog static, and the flicker of VHS footage. Here, nothing is entirely real — or fake. The truth is partitioned, archived, burned, then buried beneath a black site. What’s left is what they didn’t want you to see… or what refused to stay hidden.
 
-This is your entry point into the buried history of mankind:
+This archive contains the buried history of mankind:
 - The cryptids that watch through fogged windows.
 - The agents who burned photographs to erase proof.
 - The minds broken by contact with The Rift.
 - The unexplainable machines buzzing in your dreams.
 
-**KNOWN UNKNOWN** isn't just a story — it’s a living conspiracy. A fractured puzzle of historical what-ifs, classified documents, and whispered warnings, all orbiting a shared, shifting narrative.
+**KNOWN UNKNOWN** represents a living conspiracy. A fractured puzzle of historical what-ifs, classified documents, and whispered warnings, all orbiting a shared, shifting narrative.
 
 > “They didn’t cover it up because it wasn’t real.
 > They covered it up because it wouldn’t go away.”
