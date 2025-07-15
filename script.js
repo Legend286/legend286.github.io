@@ -118,7 +118,7 @@ class ArchiveSystem {
                 this.displayContent(content);
                 this.updateFileInfo(this.getFileNumber(contentId), this.getFileName(contentId));
                 this.currentContent = contentId;
-            }, 800);
+            }, 8500); // Extended timeout for full typing + dot sequence + OK
             
         } catch (error) {
             console.error('Error loading content:', error);
@@ -205,7 +205,7 @@ class ArchiveSystem {
         
         const loadingHTML = `
             <div class="loading-screen" style="display: block;">
-                <div class="loading-text">ACCESSING ARCHIVE...</div>
+                <div class="loading-text" id="loading-text-animation"></div>
                 <div class="loading-bar">
                     <div class="loading-progress"></div>
                 </div>
@@ -213,6 +213,42 @@ class ArchiveSystem {
         `;
         
         documentContent.innerHTML = loadingHTML;
+        
+        // Start typing animation
+        this.startTypingAnimation();
+    }
+
+    startTypingAnimation() {
+        const loadingTextEl = document.getElementById('loading-text-animation');
+        if (!loadingTextEl) return;
+        
+        const baseText = 'ACCESSING ARCHIVE...';
+        const dotSequence = [' .', ' ..', ' ...', ' .', ' ..', ' ...', ' OK'];
+        let currentText = '';
+        let index = 0;
+        let dotIndex = 0;
+        let isTypingDots = false;
+        
+        const typeInterval = setInterval(() => {
+            if (!isTypingDots && index < baseText.length) {
+                // Type the main text
+                currentText += baseText[index];
+                loadingTextEl.textContent = currentText + (Math.random() > 0.5 ? '_' : '');
+                index++;
+            } else if (!isTypingDots) {
+                // Finished main text, start dot sequence
+                isTypingDots = true;
+                loadingTextEl.textContent = currentText; // Remove cursor
+            } else if (dotIndex < dotSequence.length) {
+                // Type the dot sequence
+                loadingTextEl.textContent = baseText + dotSequence[dotIndex];
+                dotIndex++;
+            } else {
+                // Finished everything
+                loadingTextEl.textContent = baseText + ' OK';
+                clearInterval(typeInterval);
+            }
+        }, 300); // 300ms per step
     }
 
     displayContent(htmlContent) {
@@ -533,31 +569,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }, 3000);
-
-    // Typing effect for loading text
-    const observeLoadingText = () => {
-        const loadingTexts = document.querySelectorAll('.loading-text');
-        loadingTexts.forEach(el => {
-            if (el.style.display !== 'none') {
-                const originalText = el.textContent;
-                let currentText = '';
-                let index = 0;
-                
-                const typeInterval = setInterval(() => {
-                    if (index < originalText.length) {
-                        currentText += originalText[index];
-                        el.textContent = currentText + (Math.random() > 0.7 ? '_' : '');
-                        index++;
-                    } else {
-                        el.textContent = originalText;
-                        clearInterval(typeInterval);
-                    }
-                }, 50);
-            }
-        });
-    };
-
-    // Observe for new loading screens
-    const observer = new MutationObserver(observeLoadingText);
-    observer.observe(document.body, { childList: true, subtree: true });
 }); 
