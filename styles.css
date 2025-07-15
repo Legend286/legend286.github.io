@@ -698,8 +698,102 @@ body {
 .document-content hr {
     border: none;
     height: 2px;
-    background-color: var(--border-color);
-    margin: var(--spacing-xxl) 0;
+    background: linear-gradient(90deg, transparent, var(--accent-red), transparent);
+    margin: var(--spacing-xl) 0;
+}
+
+/* Markdown Table Styles */
+.document-content .markdown-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--spacing-xl) 0;
+    background-color: var(--bg-tertiary);
+    border: 2px solid var(--border-color);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+.document-content .markdown-table th {
+    background: linear-gradient(135deg, var(--accent-red), #aa2222);
+    color: white;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: 1px solid var(--accent-red);
+    text-align: left;
+    position: relative;
+}
+
+.document-content .markdown-table th::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent-yellow);
+}
+
+.document-content .markdown-table td {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    vertical-align: top;
+    line-height: 1.5;
+    transition: background-color 0.2s ease;
+}
+
+.document-content .markdown-table tr:nth-child(even) td {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.document-content .markdown-table tr:hover td {
+    background-color: rgba(255, 204, 0, 0.1);
+    color: var(--text-primary);
+}
+
+.document-content .markdown-table td code {
+    background-color: var(--bg-primary);
+    color: var(--accent-green);
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-size: 0.85rem;
+}
+
+.document-content .markdown-table td strong {
+    color: var(--accent-yellow);
+    font-weight: 600;
+}
+
+.document-content .markdown-table td em {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* Mobile Table Responsiveness */
+@media (max-width: 768px) {
+    .document-content .markdown-table {
+        font-size: 0.8rem;
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        margin: var(--spacing-lg) 0;
+        border-radius: 4px;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .document-content .markdown-table th,
+    .document-content .markdown-table td {
+        padding: var(--spacing-sm) var(--spacing-md);
+        min-width: 120px;
+    }
+    
+    .document-content .markdown-table th {
+        font-size: 0.75rem;
+    }
 }
 
 .document-content strong {
@@ -720,18 +814,18 @@ body {
     margin-bottom: var(--spacing-sm);
 }
 
-/* Mobile Menu Toggle */
+/* Mobile Menu Toggle - Hidden by default on desktop */
 .mobile-menu-toggle {
-    display: none;
+    display: none; /* Hidden on desktop */
     background-color: var(--accent-red);
     border: 2px solid var(--accent-yellow);
     color: white;
     font-family: var(--font-mono);
     font-size: 0.9rem;
     font-weight: 600;
-    padding: 12px 16px; /* Increased for better touch targets */
-    min-height: 44px; /* iOS minimum touch target */
-    min-width: 44px; /* iOS minimum touch target */
+    padding: 12px 16px;
+    min-height: 44px;
+    min-width: 44px;
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -740,12 +834,11 @@ body {
     top: 50%;
     transform: translateY(-50%);
     transition: all 0.3s ease;
-    border-radius: 4px; /* Softer corners for mobile */
-    display: flex;
+    border-radius: 4px;
     align-items: center;
     justify-content: center;
     gap: var(--spacing-xs);
-    -webkit-tap-highlight-color: transparent; /* Remove iOS blue tap highlight */
+    -webkit-tap-highlight-color: transparent;
     user-select: none;
 }
 
@@ -841,7 +934,7 @@ body {
 
 @media (max-width: 768px) {
     .mobile-menu-toggle {
-        display: flex;
+        display: flex !important; /* Show only on mobile screens */
     }
     
     .sidebar-close {
@@ -898,46 +991,7 @@ body {
     }
 } 
 
-/* Mobile Enhancements and Better Touch Targets */
-.mobile-menu-toggle {
-    display: none;
-    background-color: var(--accent-red);
-    border: 2px solid var(--accent-yellow);
-    color: white;
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    font-weight: 600;
-    padding: 12px 16px; /* Increased for better touch targets */
-    min-height: 44px; /* iOS minimum touch target */
-    min-width: 44px; /* iOS minimum touch target */
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    position: absolute;
-    left: var(--spacing-md);
-    top: 50%;
-    transform: translateY(-50%);
-    transition: all 0.3s ease;
-    border-radius: 4px; /* Softer corners for mobile */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-xs);
-    -webkit-tap-highlight-color: transparent; /* Remove iOS blue tap highlight */
-    user-select: none;
-}
-
-.mobile-menu-toggle:hover,
-.mobile-menu-toggle:active {
-    background-color: var(--accent-yellow);
-    color: var(--bg-primary);
-    transform: translateY(-50%) scale(1.05);
-}
-
-.menu-icon {
-    font-size: 1.2rem;
-    line-height: 1;
-}
+/* Mobile Enhancements and Better Touch Targets - This section contains mobile-specific optimizations */
 
 /* Enhanced Search Input for Mobile */
 .search-input {
@@ -1155,5 +1209,171 @@ body {
         font-size: 10px;
         padding: var(--spacing-xs) var(--spacing-sm);
         margin-bottom: var(--spacing-sm);
+    }
+} 
+
+/* Search Results Styling */
+.search-results {
+    max-width: 100%;
+}
+
+.search-info {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    border-radius: 4px;
+}
+
+.search-suggestions {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+    border-radius: 4px;
+}
+
+.search-suggestions h3 {
+    font-family: var(--font-mono);
+    color: var(--accent-yellow);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: var(--spacing-md);
+}
+
+.suggestion-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.search-tag {
+    background-color: var(--accent-red);
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--accent-red);
+    user-select: none;
+}
+
+.search-tag:hover {
+    background-color: var(--accent-yellow);
+    color: var(--bg-primary);
+    border-color: var(--accent-yellow);
+    transform: translateY(-1px);
+}
+
+.search-result {
+    position: relative;
+    background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+    transition: all 0.3s ease;
+}
+
+.search-result:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    border-color: var(--accent-yellow);
+}
+
+.search-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-sm);
+}
+
+.search-result-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.relevance-score {
+    background-color: var(--accent-green);
+    color: var(--bg-primary);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.search-result-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+    align-items: center;
+}
+
+.match-term {
+    background-color: var(--accent-yellow);
+    color: var(--bg-primary);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.file-tag {
+    background-color: var(--bg-primary);
+    color: var(--accent-red);
+    border: 1px solid var(--accent-red);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Mobile Search Enhancements */
+@media (max-width: 768px) {
+    .search-result-header {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+    
+    .relevance-score {
+        align-self: flex-start;
+        font-size: 0.65rem;
+    }
+    
+    .search-result-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-xs);
+    }
+    
+    .suggestion-tags {
+        justify-content: center;
+    }
+    
+    .search-tag {
+        font-size: 0.75rem;
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+    
+    .search-info {
+        font-size: 0.8rem;
+        padding: var(--spacing-sm);
     }
 } 

@@ -34,6 +34,12 @@
             "contentId": "pre-history",
             "fileNumber": "ERA I TIMELINE",
             "fileName": "Prehistory Dossier"
+          },
+          {
+            "title": "Table Test // Demo",
+            "contentId": "table-test",
+            "fileNumber": "TABLE TEST",
+            "fileName": "Table Test"
           }
         ]
       },
@@ -161,7 +167,10 @@
       "rift breach": "pre-history",
       "whispering tablets": "pre-history",
       "black antlers": "pre-history",
-      "temporal": "pre-history"
+      "temporal": "pre-history",
+      "table": "table-test",
+      "classification": "table-test",
+      "entity": "table-test"
     }
   },
   "templates": {

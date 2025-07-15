@@ -5,15 +5,18 @@ class ArchiveSystem {
     constructor() {
         this.currentContent = 'home';
         this.cache = new Map();
+        this.contentCache = new Map();
         this.searchIndex = new Map();
         
         this.init();
     }
 
-    init() {
+    async init() {
         this.setupEventListeners();
         this.updateCurrentDate();
-        this.buildSearchIndex();
+        
+        // Build search index asynchronously
+        await this.buildSearchIndex();
         
         // Load initial content
         this.loadContent('home');
@@ -189,17 +192,23 @@ class ArchiveSystem {
     }
 
     async loadContent(contentId) {
-        if (contentId === 'home') {
-            this.showHomeContent();
-            this.updateFileInfo('ARCHIVE OVERVIEW', 'Home');
-            return;
-        }
-
-        // Show loading screen
-        this.showLoading();
-        
         try {
-            let content;
+            // Show loading screen
+            this.showLoading();
+            
+            let content = '';
+            
+            // Handle special case for home content
+            if (contentId === 'home') {
+                // Show home content directly without markdown loading
+                setTimeout(() => {
+                    this.showHomeContent();
+                    this.updateFileInfo(this.getFileNumber(contentId), this.getFileName(contentId));
+                    this.setActiveNavLink(document.querySelector(`[data-content="${contentId}"]`));
+                    this.currentContent = contentId;
+                }, 4100); // Same timing as other content for consistency
+                return;
+            }
             
             // Check cache first
             if (this.cache.has(contentId)) {
@@ -208,12 +217,12 @@ class ArchiveSystem {
                 // Load from markdown file
                 const response = await fetch(`${contentId}.md`);
                 if (!response.ok) {
-                    throw new Error(`Failed to load ${contentId}.md`);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 const markdown = await response.text();
                 content = this.markdownToHTML(markdown);
                 
-                // Cache the content
+                // Cache the processed content
                 this.cache.set(contentId, content);
             }
             
@@ -221,8 +230,9 @@ class ArchiveSystem {
             setTimeout(() => {
                 this.displayContent(content);
                 this.updateFileInfo(this.getFileNumber(contentId), this.getFileName(contentId));
+                this.setActiveNavLink(document.querySelector(`[data-content="${contentId}"]`));
                 this.currentContent = contentId;
-            }, 2500); // 2.5 seconds total loading time
+            }, 4100); // Timing: 1.3s (text) + 1.8s (dots: 6×300ms) + 0.6s (OK) + 0.4s buffer = 4.1s
             
         } catch (error) {
             console.error('Error loading content:', error);
@@ -333,7 +343,7 @@ class ArchiveSystem {
         if (!loadingTextEl) return;
         
         const baseText = 'ACCESSING ARCHIVE';
-        const dotSequence = ['.', '..', '...', '.', '..', '...', ' OK'];
+        const dotSequence = ['.', '..', '...', '.', '..', '...'];
         let currentText = '';
         let index = 0;
         let dotIndex = 0;
@@ -341,7 +351,7 @@ class ArchiveSystem {
         
         const typeInterval = setInterval(() => {
             if (!isTypingDots && index < baseText.length) {
-                // Type the main text (faster)
+                // Type the main text
                 currentText += baseText[index];
                 loadingTextEl.textContent = currentText + (Math.random() > 0.5 ? '_' : '');
                 index++;
@@ -352,21 +362,28 @@ class ArchiveSystem {
                         isTypingDots = true;
                         loadingTextEl.textContent = baseText; // Remove cursor
                         
-                        // Start dot sequence timing for 2.5s total
+                        // Start slower dot sequence animation
                         const dotInterval = setInterval(() => {
                             if (dotIndex < dotSequence.length) {
                                 loadingTextEl.textContent = baseText + dotSequence[dotIndex];
                                 dotIndex++;
                             } else {
                                 clearInterval(dotInterval);
+                                
+                                // Show "OK" for 0.6 seconds before continuing
+                                loadingTextEl.textContent = baseText + ' OK';
+                                setTimeout(() => {
+                                    // This timeout allows the loading to complete
+                                    // The actual content loading will happen in loadContent
+                                }, 600); // Show OK for 0.6 seconds (doubled from 0.3)
                             }
-                        }, 175); // 175ms for each dot step (fits in remaining ~1.2s)
+                        }, 300); // Slower: 300ms for each dot step (was 175ms)
                     }, 100);
                     
                     clearInterval(typeInterval);
                 }
             }
-        }, 80); // 80ms per character for 2.5s total timing
+        }, 80); // Keep main text typing speed the same
     }
 
     displayContent(htmlContent) {
@@ -438,20 +455,24 @@ class ArchiveSystem {
 
     getFileNumber(contentId) {
         const fileNumbers = {
+            'home': 'ARCHIVE OVERVIEW',
             'first_lore_document': 'FILE 0001',
-            'known_unknown_lore': 'LORE DOSSIER',
+            'known_unknown_lore': 'MAIN ARCHIVE',
             'redwood_deep_dossier': 'FILE 0024',
-            'pre-history': 'ERA I TIMELINE'
+            'pre-history': 'ERA I TIMELINE',
+            'table-test': 'TABLE TEST'
         };
-        return fileNumbers[contentId] || 'ARCHIVE FILE';
+        return fileNumbers[contentId] || 'UNKNOWN FILE';
     }
 
     getFileName(contentId) {
         const fileNames = {
+            'home': 'Archive Overview',
             'first_lore_document': 'Introductory Dossier',
             'known_unknown_lore': 'Known Unknown Lore',
             'redwood_deep_dossier': 'Redwood Deep Site Dossier',
-            'pre-history': 'Prehistory Dossier'
+            'pre-history': 'Prehistory Dossier',
+            'table-test': 'Table Functionality Test'
         };
         return fileNames[contentId] || 'Unknown Document';
     }
@@ -473,6 +494,9 @@ class ArchiveSystem {
         // Code blocks
         html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
         html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+        
+        // Process tables BEFORE blockquotes and paragraphs
+        html = this.parseMarkdownTables(html);
         
         // Blockquotes - handle multi-line quotes properly
         html = html.replace(/^> (.*)$/gm, '|||BLOCKQUOTE|||$1');
@@ -525,35 +549,272 @@ class ArchiveSystem {
         html = html.replace(/<p>(<ul>.*?<\/ul>)<\/p>/s, '$1');
         html = html.replace(/<p>(<blockquote>.*?<\/blockquote>)<\/p>/gs, '$1');
         html = html.replace(/<p>(<pre>.*?<\/pre>)<\/p>/s, '$1');
+        html = html.replace(/<p>(<table>.*?<\/table>)<\/p>/gs, '$1');
         
         return html;
     }
 
-    buildSearchIndex() {
-        // Build search index from navigation and content
-        const navLinks = document.querySelectorAll('.nav-link[data-content]');
-        navLinks.forEach(link => {
-            const contentId = link.getAttribute('data-content');
-            const title = link.textContent;
-            this.searchIndex.set(title.toLowerCase(), contentId);
-        });
+    parseMarkdownTables(markdown) {
+        // Split content by lines for table processing
+        const lines = markdown.split('\n');
+        const result = [];
+        let i = 0;
+
+        while (i < lines.length) {
+            const line = lines[i].trim();
+            
+            // Check if current line looks like a table header (contains pipes)
+            if (line.includes('|') && line.split('|').length >= 3) {
+                // Look ahead to see if next line is a separator (contains dashes and pipes)
+                const nextLine = i + 1 < lines.length ? lines[i + 1].trim() : '';
+                
+                if (nextLine.includes('|') && nextLine.includes('-')) {
+                    // This is likely a table, parse it
+                    const tableData = this.parseTableBlock(lines, i);
+                    result.push(tableData.html);
+                    i = tableData.nextIndex;
+                } else {
+                    result.push(lines[i]);
+                    i++;
+                }
+            } else {
+                result.push(lines[i]);
+                i++;
+            }
+        }
+
+        return result.join('\n');
+    }
+
+    parseTableBlock(lines, startIndex) {
+        const tableLines = [];
+        let currentIndex = startIndex;
         
-        // Add additional search terms
-        this.searchIndex.set('bureau', 'known_unknown_lore');
-        this.searchIndex.set('riftborn', 'known_unknown_lore');
-        this.searchIndex.set('lost kin', 'known_unknown_lore');
-        this.searchIndex.set('unbound', 'known_unknown_lore');
-        this.searchIndex.set('birchskin', 'redwood_deep_dossier');
-        this.searchIndex.set('doorlicker', 'redwood_deep_dossier');
-        this.searchIndex.set('redwood', 'redwood_deep_dossier');
-        this.searchIndex.set('forest', 'redwood_deep_dossier');
-        this.searchIndex.set('introduction', 'first_lore_document');
-        this.searchIndex.set('overview', 'home');
-        this.searchIndex.set('prehistory', 'pre-history');
-        this.searchIndex.set('timeline', 'pre-history');
-        this.searchIndex.set('era i', 'pre-history');
-        this.searchIndex.set('ancient', 'pre-history');
-        this.searchIndex.set('temporal', 'pre-history');
+        // Collect all consecutive table lines
+        while (currentIndex < lines.length) {
+            const line = lines[currentIndex].trim();
+            if (line.includes('|')) {
+                tableLines.push(line);
+                currentIndex++;
+            } else if (line === '') {
+                // Empty line might be part of table formatting
+                currentIndex++;
+                continue;
+            } else {
+                // Non-table line, stop collecting
+                break;
+            }
+        }
+
+        // Parse the collected table lines
+        let html = '<table class="markdown-table">\n';
+        let headerProcessed = false;
+        let separatorFound = false;
+
+        for (let i = 0; i < tableLines.length; i++) {
+            const line = tableLines[i];
+            
+            // Skip separator lines (contain only dashes, pipes, and spaces)
+            if (line.match(/^[\|\-\s:]+$/)) {
+                separatorFound = true;
+                continue;
+            }
+
+            // Parse table row
+            const cells = line.split('|')
+                .map(cell => cell.trim())
+                .filter(cell => cell !== ''); // Remove empty cells from start/end
+
+            if (cells.length === 0) continue;
+
+            // Determine if this is header row (first row before separator)
+            const isHeader = !headerProcessed && !separatorFound;
+            const tag = isHeader ? 'th' : 'td';
+            const rowClass = isHeader ? 'table-header' : 'table-row';
+
+            html += `  <tr class="${rowClass}">\n`;
+            cells.forEach(cell => {
+                // Process basic markdown within cells
+                let cellContent = cell
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/`(.*?)`/g, '<code>$1</code>');
+                
+                html += `    <${tag}>${cellContent}</${tag}>\n`;
+            });
+            html += '  </tr>\n';
+
+            if (isHeader) headerProcessed = true;
+        }
+
+        html += '</table>';
+
+        return {
+            html: html,
+            nextIndex: currentIndex
+        };
+    }
+
+    async buildSearchIndex() {
+        // Clear existing index
+        this.searchIndex.clear();
+        this.contentCache = new Map();
+        
+        try {
+            // Load content configuration
+            const configResponse = await fetch('content-config.json');
+            
+            if (!configResponse.ok) {
+                throw new Error(`Failed to load config: ${configResponse.status}`);
+            }
+            
+            const config = await configResponse.json();
+            
+            if (!config || !config.navigation || !config.navigation.sections) {
+                throw new Error('Invalid config structure - missing navigation.sections');
+            }
+            
+            // Build search index from configuration
+            for (const section of config.navigation.sections) {
+                if (!section || !section.items || !Array.isArray(section.items)) {
+                    console.warn(`Invalid section structure for ${section?.title || 'unknown'}`);
+                    continue;
+                }
+                
+                for (const item of section.items) {
+                    if (item && item.contentId && !item.disabled) {
+                        // Add title and variations
+                        if (item.title) {
+                            this.addToSearchIndex(item.title.toLowerCase(), item.contentId);
+                        }
+                        this.addToSearchIndex(item.contentId.replace(/-/g, ' ').toLowerCase(), item.contentId);
+                        
+                        // Load and index document content
+                        await this.indexDocumentContent(item.contentId);
+                    }
+                }
+            }
+            
+            // Add keyword mappings from config
+            if (config.searchIndex && config.searchIndex.terms && typeof config.searchIndex.terms === 'object') {
+                for (const [keyword, contentId] of Object.entries(config.searchIndex.terms)) {
+                    if (keyword && contentId) {
+                        this.addToSearchIndex(keyword.toLowerCase(), contentId);
+                    }
+                }
+            }
+            
+        } catch (error) {
+            console.error('Error building search index:', error);
+            this.buildFallbackSearchIndex();
+        }
+    }
+
+    async indexDocumentContent(contentId) {
+        try {
+            // Skip home content since it's generated dynamically
+            if (contentId === 'home') {
+                // Add some basic search terms for home content
+                const homeTerms = ['overview', 'archive', 'bureau', 'classified', 'home', 'introduction'];
+                homeTerms.forEach(term => {
+                    this.addToSearchIndex(term, contentId);
+                });
+                return;
+            }
+            
+            // Skip if already cached
+            if (this.contentCache.has(contentId)) {
+                return;
+            }
+            
+            // Try to load as markdown first
+            let content = '';
+            try {
+                const response = await fetch(`${contentId}.md`);
+                if (response.ok) {
+                    const markdown = await response.text();
+                    content = markdown;
+                    this.contentCache.set(contentId, { type: 'markdown', content: markdown });
+                }
+            } catch (e) {
+                // If markdown fails, try HTML
+                try {
+                    const response = await fetch(`${contentId}.html`);
+                    if (response.ok) {
+                        const html = await response.text();
+                        content = html;
+                        this.contentCache.set(contentId, { type: 'html', content: html });
+                    }
+                } catch (e2) {
+                    // Content not found, which is okay for some items
+                    return;
+                }
+            }
+            
+            if (content) {
+                // Extract text content for indexing
+                const textContent = this.extractTextFromContent(content);
+                const words = textContent.toLowerCase()
+                    .replace(/[^\w\s]/g, ' ')
+                    .split(/\s+/)
+                    .filter(word => word.length > 2); // Only index words longer than 2 characters
+                
+                // Add unique words to search index
+                const uniqueWords = [...new Set(words)];
+                uniqueWords.forEach(word => {
+                    this.addToSearchIndex(word, contentId);
+                });
+            }
+            
+        } catch (error) {
+            console.error(`Error indexing content for ${contentId}:`, error);
+        }
+    }
+
+    extractTextFromContent(content) {
+        // Remove markdown/HTML formatting for text extraction
+        return content
+            .replace(/```[\s\S]*?```/g, '') // Remove code blocks
+            .replace(/`[^`]+`/g, '') // Remove inline code
+            .replace(/#+ /g, '') // Remove headers
+            .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove bold
+            .replace(/\*([^*]+)\*/g, '$1') // Remove italic
+            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links, keep text
+            .replace(/[|]/g, ' ') // Replace table pipes with spaces
+            .replace(/[-=]{3,}/g, '') // Remove separator lines
+            .replace(/^\s*[>]/gm, '') // Remove blockquote markers
+            .replace(/^\s*[-*+]/gm, '') // Remove list markers
+            .replace(/\n+/g, ' ') // Replace newlines with spaces
+            .replace(/\s+/g, ' ') // Normalize whitespace
+            .trim();
+    }
+
+    addToSearchIndex(term, contentId) {
+        if (!this.searchIndex.has(term)) {
+            this.searchIndex.set(term, []);
+        }
+        const contentIds = this.searchIndex.get(term);
+        if (!contentIds.includes(contentId)) {
+            contentIds.push(contentId);
+        }
+    }
+
+    buildFallbackSearchIndex() {
+        // Fallback search index if config loading fails
+        const fallbackMappings = {
+            'home': ['overview', 'introduction', 'bureau', 'archive'],
+            'first_lore_document': ['introduction', 'lore', 'document', 'file', '0001'],
+            'known_unknown_lore': ['bureau', 'riftborn', 'lost kin', 'unbound', 'lore', 'main'],
+            'redwood_deep_dossier': ['redwood', 'deep', 'site', 'dossier', 'birchskin', 'doorlicker', 'forest'],
+            'pre-history': ['prehistory', 'timeline', 'era', 'ancient', 'temporal', 'tablets'],
+            'table-test': ['table', 'test', 'demo', 'classification', 'entity']
+        };
+        
+        for (const [contentId, terms] of Object.entries(fallbackMappings)) {
+            terms.forEach(term => {
+                this.addToSearchIndex(term.toLowerCase(), contentId);
+            });
+        }
     }
 
     performSearch() {
@@ -569,29 +830,58 @@ class ArchiveSystem {
             return;
         }
         
-        const results = [];
+        const results = new Map(); // Use Map to avoid duplicates
+        const queryWords = query.split(/\s+/).filter(word => word.length > 0);
         
         // Search through index
-        for (const [term, contentId] of this.searchIndex.entries()) {
-            if (term.includes(query) || query.includes(term)) {
-                if (!results.find(r => r.contentId === contentId)) {
-                    results.push({
-                        contentId: contentId,
-                        title: this.getFileName(contentId),
-                        fileNumber: this.getFileNumber(contentId),
-                        relevance: term === query ? 100 : 50
-                    });
+        for (const [term, contentIds] of this.searchIndex.entries()) {
+            let relevanceScore = 0;
+            
+            // Exact match (highest relevance)
+            if (term === query) {
+                relevanceScore = 100;
+            }
+            // Term contains query or query contains term
+            else if (term.includes(query)) {
+                relevanceScore = 80;
+            }
+            else if (query.includes(term)) {
+                relevanceScore = 70;
+            }
+            // Individual word matches
+            else {
+                const wordMatches = queryWords.filter(word => 
+                    term.includes(word) || word.includes(term)
+                ).length;
+                if (wordMatches > 0) {
+                    relevanceScore = 30 + (wordMatches * 10);
                 }
+            }
+            
+            if (relevanceScore > 0) {
+                contentIds.forEach(contentId => {
+                    if (!results.has(contentId) || results.get(contentId).relevance < relevanceScore) {
+                        results.set(contentId, {
+                            contentId: contentId,
+                            title: this.getFileName(contentId),
+                            fileNumber: this.getFileNumber(contentId),
+                            relevance: relevanceScore,
+                            matchedTerm: term
+                        });
+                    }
+                });
             }
         }
         
-        // Sort by relevance
-        results.sort((a, b) => b.relevance - a.relevance);
+        // Convert to array and sort by relevance
+        const sortedResults = Array.from(results.values())
+            .sort((a, b) => b.relevance - a.relevance)
+            .slice(0, 10); // Limit to top 10 results
         
-        this.showSearchResults(results);
+        this.showSearchResults(sortedResults, query);
     }
 
-    showSearchResults(results) {
+    showSearchResults(results, query = '') {
         const documentContent = document.getElementById('document-content');
         
         if (results.length === 0) {
@@ -605,7 +895,7 @@ class ArchiveSystem {
                         </div>
                     </div>
                     <div class="alert-box">
-                        <strong>NOTICE:</strong> No documents found matching your search criteria.
+                        <strong>NOTICE:</strong> No documents found matching "${query}".
                     </div>
                     <p>The requested information may be:</p>
                     <ul>
@@ -615,16 +905,34 @@ class ArchiveSystem {
                         <li>Does not exist in bureau records</li>
                     </ul>
                     <p><em>Try different search terms or browse the archive index.</em></p>
+                    <div class="search-suggestions">
+                        <h3>Suggested Terms:</h3>
+                        <div class="suggestion-tags">
+                            <span class="search-tag" onclick="archiveSystem.searchForTerm('bureau')">bureau</span>
+                            <span class="search-tag" onclick="archiveSystem.searchForTerm('riftborn')">riftborn</span>
+                            <span class="search-tag" onclick="archiveSystem.searchForTerm('redwood')">redwood</span>
+                            <span class="search-tag" onclick="archiveSystem.searchForTerm('timeline')">timeline</span>
+                            <span class="search-tag" onclick="archiveSystem.searchForTerm('entity')">entity</span>
+                        </div>
+                    </div>
                 </div>
             `;
+            this.updateFileInfo('SEARCH RESULTS', 'Archive Search');
+            this.currentContent = 'search';
             return;
         }
         
-        const resultsHTML = results.map(result => `
+        const resultsHTML = results.map((result, index) => `
             <div class="content-card search-result" data-target="${result.contentId}">
-                <h3>📄 ${result.title}</h3>
+                <div class="search-result-header">
+                    <h3>📄 ${result.title}</h3>
+                    <span class="relevance-score">Relevance: ${result.relevance}%</span>
+                </div>
                 <p>Match found in bureau archives.</p>
-                <span class="file-tag">${result.fileNumber}</span>
+                <div class="search-result-meta">
+                    <span class="file-tag">${result.fileNumber}</span>
+                    ${result.matchedTerm ? `<span class="match-term">Matched: "${result.matchedTerm}"</span>` : ''}
+                </div>
             </div>
         `).join('');
         
@@ -638,7 +946,10 @@ class ArchiveSystem {
                     </div>
                 </div>
                 <div class="alert-box" style="background-color: var(--accent-green);">
-                    <strong>SUCCESS:</strong> ${results.length} document(s) found matching your search criteria.
+                    <strong>SUCCESS:</strong> ${results.length} document(s) found matching "${query}".
+                </div>
+                <div class="search-info">
+                    <p><strong>Query:</strong> "${query}" | <strong>Results:</strong> ${results.length} | <strong>Search completed in:</strong> <0.1s</p>
                 </div>
                 <div class="content-grid">
                     ${resultsHTML}
@@ -647,7 +958,16 @@ class ArchiveSystem {
         `;
         
         this.updateFileInfo('SEARCH RESULTS', 'Archive Search');
+        this.currentContent = 'search';
         this.attachContentCardListeners();
+    }
+
+    searchForTerm(term) {
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.value = term;
+            this.performSearch();
+        }
     }
 
     clearSearch() {
@@ -751,8 +1071,11 @@ class ArchiveSystem {
 }
 
 // Initialize the archive system when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-    new ArchiveSystem();
+let archiveSystem;
+document.addEventListener('DOMContentLoaded', async () => {
+    archiveSystem = new ArchiveSystem();
+    // Make it globally accessible for search suggestions
+    window.archiveSystem = archiveSystem;
 });
 
 // Add some atmospheric effects
