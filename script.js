@@ -460,6 +460,8 @@ class ArchiveSystem {
             'known_unknown_lore': 'MAIN ARCHIVE',
             'redwood_deep_dossier': 'FILE 0024',
             'pre-history': 'ERA I TIMELINE',
+            'early-history': 'ERA II TIMELINE',
+            '20th-century-history-pt1': 'ERA III TIMELINE',
             'table-test': 'TABLE TEST'
         };
         return fileNumbers[contentId] || 'UNKNOWN FILE';
@@ -472,6 +474,8 @@ class ArchiveSystem {
             'known_unknown_lore': 'Known Unknown Lore',
             'redwood_deep_dossier': 'Redwood Deep Site Dossier',
             'pre-history': 'Prehistory Dossier',
+            'early-history': 'Early History Dossier',
+            '20th-century-history-pt1': '20th Century History - Part 1',
             'table-test': 'Table Functionality Test'
         };
         return fileNames[contentId] || 'Unknown Document';
@@ -807,6 +811,8 @@ class ArchiveSystem {
             'known_unknown_lore': ['bureau', 'riftborn', 'lost kin', 'unbound', 'lore', 'main'],
             'redwood_deep_dossier': ['redwood', 'deep', 'site', 'dossier', 'birchskin', 'doorlicker', 'forest'],
             'pre-history': ['prehistory', 'timeline', 'era', 'ancient', 'temporal', 'tablets'],
+            'early-history': ['early', 'history', 'era ii', 'obscured', 'plague', 'roanoke', 'erasure', 'memetic'],
+            '20th-century-history-pt1': ['20th', 'century', 'era iii', 'veil', 'tesla', 'verdun', 'bureau', 'industrial'],
             'table-test': ['table', 'test', 'demo', 'classification', 'entity']
         };
         

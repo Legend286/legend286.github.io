@@ -36,6 +36,18 @@
             "fileName": "Prehistory Dossier"
           },
           {
+            "title": "Era II // Obscured Era",
+            "contentId": "early-history",
+            "fileNumber": "ERA II TIMELINE",
+            "fileName": "Early History Dossier"
+          },
+          {
+            "title": "Era III // The Veil Thins",
+            "contentId": "20th-century-history-pt1",
+            "fileNumber": "ERA III TIMELINE",
+            "fileName": "20th Century History - Part 1"
+          },
+          {
             "title": "Table Test // Demo",
             "contentId": "table-test",
             "fileNumber": "TABLE TEST",
@@ -123,6 +135,18 @@
         "description": "Era I chronological record of anomalous events from 6000 BCE to 0 CE. Ancient rift breaches and temporal artifacts.",
         "fileTag": "ERA I",
         "target": "pre-history"
+      },
+      {
+        "title": "🕯️ EARLY HISTORY TIMELINE",
+        "description": "Era II chronological record covering 1100 to 1850 CE. The age of erasure, memetic fog, and hidden anomalies.",
+        "fileTag": "ERA II",
+        "target": "early-history"
+      },
+      {
+        "title": "🛰️ 20TH CENTURY TIMELINE",
+        "description": "Era III record from 1900-1946. Industrial anomalies, Tesla signals, and the founding of the Bureau.",
+        "fileTag": "ERA III",
+        "target": "20th-century-history-pt1"
       }
     ],
     "recentActivity": [
@@ -168,6 +192,30 @@
       "whispering tablets": "pre-history",
       "black antlers": "pre-history",
       "temporal": "pre-history",
+      "early history": "early-history",
+      "era ii": "early-history",
+      "obscured era": "early-history",
+      "plague ships": "early-history",
+      "roanoke": "early-history",
+      "mirrorless": "early-history",
+      "franklin": "early-history",
+      "erasure": "early-history",
+      "memetic fog": "early-history",
+      "tongueless seers": "early-history",
+      "20th century": "20th-century-history-pt1",
+      "era iii": "20th-century-history-pt1",
+      "veil thins": "20th-century-history-pt1",
+      "tesla": "20th-century-history-pt1",
+      "signal tower": "20th-century-history-pt1",
+      "verdun": "20th-century-history-pt1",
+      "echo": "20th-century-history-pt1",
+      "aleksei mirov": "20th-century-history-pt1",
+      "bureau founding": "20th-century-history-pt1",
+      "oath": "20th-century-history-pt1",
+      "atlantic fog": "20th-century-history-pt1",
+      "convoy": "20th-century-history-pt1",
+      "ossaconda": "20th-century-history-pt1",
+      "industrial": "20th-century-history-pt1",
       "table": "table-test",
       "classification": "table-test",
       "entity": "table-test"
