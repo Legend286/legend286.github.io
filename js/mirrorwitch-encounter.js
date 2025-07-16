@@ -115,8 +115,8 @@ export class MirrorwitchEncounter {
     }
 
     scheduleNextGlitch() {
-        // Random interval between 10-60 seconds
-        const interval = Math.random() * 50000 + 10000; // 10-60 seconds
+        // Random interval between 10-15 seconds
+        const interval = Math.random() * 5000 + 10000; // 10-15 seconds
         
         setTimeout(() => {
             this.triggerGlitch();
@@ -133,10 +133,10 @@ export class MirrorwitchEncounter {
         // Play creepy audio
         this.playCreepyAudio();
         
-        // Switch back after 0.3 seconds
+        // Switch back after 0.05 seconds
         setTimeout(() => {
             this.imageElement.src = this.normalImage.src;
-        }, 300);
+        }, 50);
     }
 
     startCreepyAudio() {
