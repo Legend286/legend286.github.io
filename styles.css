@@ -16,6 +16,7 @@
     --accent-red: #cc3333;
     --accent-yellow: #ffcc00;
     --accent-green: #33cc66;
+    --accent-cyan: #00d4ff;
     --border-color: #333333;
     --redacted-bg: #000000;
     --classified-red: #ff0000;
@@ -223,8 +224,15 @@ body {
     list-style: none;
     overflow: hidden;
     transition: max-height 0.3s ease, opacity 0.3s ease;
+    max-height: 0;
+    opacity: 0;
+    margin-bottom: 0;
+}
+
+.nav-list.expanded {
     max-height: 500px;
     opacity: 1;
+    margin-bottom: var(--spacing-md);
 }
 
 .nav-list.collapsed {

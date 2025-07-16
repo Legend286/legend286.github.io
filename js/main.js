@@ -36,6 +36,13 @@ class ArchiveSystem {
             
             console.log('🎉 Archive System fully initialized');
             
+            // Development tips
+            console.log('🔧 Development Tips:');
+            console.log('  - Ctrl/Cmd + R: Reload current content (bypasses cache)');
+            console.log('  - Ctrl/Cmd + Shift + R: Clear cache and reload');
+            console.log('  - archiveSystem.clearCache(): Clear all cached content');
+            console.log('  - archiveSystem.reloadContent(): Reload current content');
+            
         } catch (error) {
             console.error('❌ Archive System initialization failed:', error);
             this.showInitializationError(error);
@@ -53,61 +60,45 @@ class ArchiveSystem {
     }
 
     showInitializationError(error) {
-        const documentContent = document.getElementById('document-content');
-        if (documentContent) {
-            documentContent.innerHTML = `
-                <div class="system-error">
-                    <div class="classification-header">
-                        <div class="classification-badge error">SYSTEM ERROR</div>
-                        <div class="file-number">INIT_FAILURE</div>
-                    </div>
-                    <h1>🚨 ARCHIVE SYSTEM INITIALIZATION FAILED</h1>
-                    <div class="error-details">
-                        <p><strong>Error:</strong> ${error.message}</p>
-                        <p>The Known Unknown Archive failed to initialize properly. This may be due to:</p>
-                        <ul>
-                            <li>Network connectivity issues</li>
-                            <li>Missing system files</li>
-                            <li>Browser compatibility problems</li>
-                            <li>Server configuration errors</li>
-                        </ul>
-                        <div class="error-actions">
-                            <button onclick="location.reload()" class="retry-btn">RETRY INITIALIZATION</button>
-                            <button onclick="console.log('System State:', this)" class="debug-btn">VIEW DEBUG INFO</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
+        document.body.innerHTML = `
+            <div style="
+                padding: 40px; 
+                background: #1a1a1a; 
+                color: #e0e0e0; 
+                font-family: monospace; 
+                text-align: center;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            ">
+                <h1 style="color: #cc3333; margin-bottom: 20px;">
+                    ⚠️ ARCHIVE SYSTEM ERROR
+                </h1>
+                <p style="margin-bottom: 20px;">
+                    Failed to initialize Known Unknown Archive system
+                </p>
+                <pre style="
+                    background: #0a0a0a; 
+                    padding: 20px; 
+                    border: 1px solid #333; 
+                    margin: 20px auto;
+                    max-width: 600px;
+                ">${error.toString()}</pre>
+                <p style="color: #b0b0b0;">
+                    Check the browser console for more details.
+                </p>
+            </div>
+        `;
     }
 
-    // Public API methods for testing and debugging
-    getSystemStatus() {
-        return {
-            audioSystem: !!this.audioSystem,
-            contentManager: !!this.contentManager,
-            searchSystem: !!this.searchSystem,
-            uiManager: !!this.uiManager,
-            currentContent: this.contentManager?.currentContent,
-            isInitialized: true
-        };
+    // Development helpers - expose cache management
+    clearCache() {
+        this.contentManager.clearCache();
     }
 
-    // Expose subsystem methods for debugging
-    activateAllFileStegano() {
-        return this.audioSystem.activateAllFileStegano();
-    }
-
-    deactivateAllFileStegano() {
-        return this.audioSystem.deactivateAllFileStegano();
-    }
-
-    checkFileSteganoStatus() {
-        return this.audioSystem.checkFileSteganoStatus();
-    }
-
-    unlockMirrorwitchConnection() {
-        return this.searchSystem.unlockMirrorwitchConnection();
+    reloadContent() {
+        this.contentManager.reloadCurrentContent();
     }
 
     loadContent(contentId) {
@@ -123,33 +114,10 @@ class ArchiveSystem {
     }
 }
 
-// Initialize the system when DOM is ready
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('📄 DOM loaded, starting archive system...');
-    
-    const archiveSystem = new ArchiveSystem();
-    await archiveSystem.init();
-    
-    // Make it globally accessible for debugging and search suggestions
-    window.archiveSystem = archiveSystem;
-    
-    // Make convenient testing functions available globally
-    window.activateAllStegano = () => archiveSystem.activateAllFileStegano();
-    window.deactivateAllStegano = () => archiveSystem.deactivateAllFileStegano();
-    window.checkSteganStatus = () => archiveSystem.checkFileSteganoStatus();
-    window.unlockMirrorwitch = () => archiveSystem.unlockMirrorwitchConnection();
-    
-    // Development helpers
-    if (typeof window !== 'undefined') {
-        window.debugArchive = () => {
-            console.log('🔧 Archive System Debug Info:');
-            console.log('Status:', archiveSystem.getSystemStatus());
-            console.log('Audio System:', archiveSystem.audioSystem);
-            console.log('Content Manager:', archiveSystem.contentManager);
-            console.log('Search System:', archiveSystem.searchSystem);
-            console.log('UI Manager:', archiveSystem.uiManager);
-        };
-    }
+// Initialize the system when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.archiveSystem = new ArchiveSystem();
+    window.archiveSystem.init();
 });
 
 // Export for potential use in other modules

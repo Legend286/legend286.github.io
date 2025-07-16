@@ -23,6 +23,7 @@
   Not consistent with known radio hardware. Frequencies occasionally spill into **non-physical audio ranges**, perceptible only via analog receivers or exposed human perception under stress.
 
 > “The numbers don’t mean anything. It’s the silence between them that counts.”  
+> 
 > – Agent Rosa Liu, Audio Division Debrief (1982)
 
 ---
@@ -74,6 +75,7 @@ U.S. Senator Alan M. Trow’s name was transmitted 2 hours before a televised st
 - Fake academic term introduced: **“Apophenic Drift Syndrome”** — now used as cover story for exposure victims
 
 > “Let them believe it’s just Cold War paranoia. If they knew the names were *real*, we’d have a collapse on our hands.”  
+> 
 > – Director Ansel V., 1977
 
 ---
@@ -115,8 +117,8 @@ U.S. Senator Alan M. Trow’s name was transmitted 2 hours before a televised st
 > “The Numbers Fiend doesn’t want to be heard.  
 > It wants to be *counted*.  
 > The moment it says your name, you’re added to a list no one alive remembers creating.”
-
-– Archivist L. Ward, Signal Watch Log #67
+> 
+> – Archivist L. Ward, Signal Watch Log #67
 
 ---
 

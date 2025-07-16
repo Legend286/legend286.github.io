@@ -242,6 +242,19 @@ export class UIManager {
                 }
             }
             
+            // Ctrl/Cmd + R to reload current content (bypasses cache)
+            if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                e.preventDefault();
+                this.contentManager.reloadCurrentContent();
+            }
+            
+            // Ctrl/Cmd + Shift + R to clear cache and reload
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {
+                e.preventDefault();
+                this.contentManager.clearCache();
+                this.contentManager.reloadCurrentContent();
+            }
+            
             // Alt + M to toggle mobile menu (for testing)
             if (e.altKey && e.key === 'm') {
                 e.preventDefault();

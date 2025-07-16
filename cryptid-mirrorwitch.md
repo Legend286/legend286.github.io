@@ -20,6 +20,7 @@ She is not always visible — but her *presence* is detectable via:
 - Reverse whispering (auditory hallucinations played backward)
 
 > “You don’t see her. You see what she wants you to think she might look like.”  
+> 
 > – Agent Hall, Post-Incident Log #0049
 
 ---
@@ -99,6 +100,7 @@ She is not always visible — but her *presence* is detectable via:
 
 > “She’s not a ghost. She’s a question that hasn’t been asked yet.  
 > And the moment you look into the mirror — she decides whether *you’re the one meant to ask it.*”
+> 
 > – Archivist M. LeFevre, Psychomemetic Residual Brief
 
 ---

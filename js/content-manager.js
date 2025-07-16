@@ -11,6 +11,7 @@ export class ContentManager {
         this.currentTilePage = 0;
         this.homeConfig = null;
         this.audioSystem = audioSystem;
+        this.bypassCache = false; // Flag to control cache bypass for development
     }
 
     async init() {
@@ -42,7 +43,8 @@ export class ContentManager {
             for (let sectionIndex = 0; sectionIndex < config.navigation.sections.length; sectionIndex++) {
                 const section = config.navigation.sections[sectionIndex];
                 const sectionId = `nav-section-${sectionIndex}`;
-                const isExpanded = section.expanded || false;
+                // Only expand the first section by default, collapse all others
+                const isExpanded = sectionIndex === 0;
                 
                 navigationHTML += `
                     <div class="nav-section">
@@ -50,7 +52,7 @@ export class ContentManager {
                             <span class="nav-title">${section.title}</span>
                             <span class="nav-icon">${isExpanded ? '▼' : '▶'}</span>
                         </div>
-                        <ul class="nav-list ${isExpanded ? 'expanded' : ''}" id="${sectionId}">
+                        <ul class="nav-list ${isExpanded ? 'expanded' : 'collapsed'}" id="${sectionId}">
                 `;
                 
                 // Add navigation items
@@ -122,11 +124,23 @@ export class ContentManager {
         if (targetList) {
             const isExpanded = targetList.classList.contains('expanded');
             
-            if (isExpanded) {
-                targetList.classList.remove('expanded');
-                header.classList.remove('active');
-                if (icon) icon.textContent = '▶';
-            } else {
+            // First, collapse all sections (accordion behavior)
+            document.querySelectorAll('.nav-header').forEach(otherHeader => {
+                const otherTargetId = otherHeader.getAttribute('data-target');
+                const otherTargetList = document.getElementById(otherTargetId);
+                const otherIcon = otherHeader.querySelector('.nav-icon');
+                
+                if (otherTargetList) {
+                    otherTargetList.classList.remove('expanded');
+                    otherTargetList.classList.add('collapsed');
+                    otherHeader.classList.remove('active');
+                    if (otherIcon) otherIcon.textContent = '▶';
+                }
+            });
+            
+            // If the clicked section wasn't expanded, expand it
+            if (!isExpanded) {
+                targetList.classList.remove('collapsed');
                 targetList.classList.add('expanded');
                 header.classList.add('active');
                 if (icon) icon.textContent = '▼';
@@ -147,8 +161,8 @@ export class ContentManager {
                 return;
             }
             
-            // Check cache first
-            if (this.contentCache.has(contentId)) {
+            // Check cache first (unless cache is being bypassed)
+            if (this.contentCache.has(contentId) && !this.bypassCache) {
                 const cachedContent = this.contentCache.get(contentId);
                 this.displayContent(cachedContent, contentId);
                 return;
@@ -157,8 +171,9 @@ export class ContentManager {
             // Show loading state
             this.showLoading();
             
-            // Fetch content
-            const response = await fetch(`${contentId}.md`);
+            // Fetch content with cache-busting for development
+            const cacheBuster = Date.now();
+            const response = await fetch(`${contentId}.md?v=${cacheBuster}`);
             
             if (!response.ok) {
                 throw new Error(`Failed to load content: ${response.status} ${response.statusText}`);
@@ -169,6 +184,9 @@ export class ContentManager {
             // Cache the content
             this.contentCache.set(contentId, markdown);
             
+            // Reset bypass cache flag
+            this.bypassCache = false;
+            
             // Display content
             this.displayContent(markdown, contentId);
             
@@ -176,6 +194,19 @@ export class ContentManager {
             console.error('Content loading error:', error);
             this.showError(`Failed to load content: ${error.message}`);
         }
+    }
+
+    // Clear content cache (useful for development)
+    clearCache() {
+        this.contentCache.clear();
+        console.log('🗑️ Content cache cleared');
+    }
+
+    // Force reload current content (bypasses cache)
+    reloadCurrentContent() {
+        this.bypassCache = true;
+        this.loadContent(this.currentContent);
+        console.log('🔄 Reloading current content (cache bypassed)');
     }
 
     displayContent(markdown, contentId) {
@@ -375,8 +406,8 @@ export class ContentManager {
         // Tables
         html = this.processMarkdownTables(html);
         
-        // Blockquotes
-        html = html.replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>');
+        // Improved blockquotes - group consecutive > lines
+        html = this.processBlockquotes(html);
         
         // Code blocks
         html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
@@ -410,8 +441,43 @@ export class ContentManager {
         html = html.replace(/<p>(<pre>[\s\S]*?<\/pre>)<\/p>/g, '$1');
         html = html.replace(/<p>(<ul>[\s\S]*?<\/ul>)<\/p>/g, '$1');
         html = html.replace(/<p>(<ol>[\s\S]*?<\/ol>)<\/p>/g, '$1');
+        html = html.replace(/<p>(<table class="markdown-table">[\s\S]*?<\/table>)<\/p>/g, '$1');
         
         return html;
+    }
+
+    processBlockquotes(html) {
+        const lines = html.split('\n');
+        const result = [];
+        let currentBlockquote = [];
+        let inBlockquote = false;
+        
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const isQuoteLine = /^>\s/.test(line);
+            
+            if (isQuoteLine) {
+                // Extract the content after the >
+                const quoteContent = line.replace(/^>\s*/, '');
+                currentBlockquote.push(quoteContent);
+                inBlockquote = true;
+            } else {
+                // If we were in a blockquote and hit a non-quote line, close it
+                if (inBlockquote && currentBlockquote.length > 0) {
+                    result.push(`<blockquote>${currentBlockquote.join('<br>')}</blockquote>`);
+                    currentBlockquote = [];
+                    inBlockquote = false;
+                }
+                result.push(line);
+            }
+        }
+        
+        // Handle any remaining blockquote at the end
+        if (inBlockquote && currentBlockquote.length > 0) {
+            result.push(`<blockquote>${currentBlockquote.join('<br>')}</blockquote>`);
+        }
+        
+        return result.join('\n');
     }
 
     addAutoHyperlinks(html) {
@@ -420,6 +486,11 @@ export class ContentManager {
             const regex = new RegExp(`\\b${escapedPattern}\\b`, 'gi');
             
             html = html.replace(regex, (match) => {
+                // Don't create links to the current file from within itself
+                if (contentId === this.currentContent) {
+                    return match;
+                }
+                
                 // Don't create links inside existing HTML tags
                 const beforeMatch = html.substring(0, html.indexOf(match));
                 const openTags = (beforeMatch.match(/</g) || []).length;
@@ -445,7 +516,7 @@ export class ContentManager {
                 row.split('|').map(cell => cell.trim()).filter(cell => cell)
             );
             
-            let tableHTML = '<table><thead><tr>';
+            let tableHTML = '<table class="markdown-table"><thead><tr>';
             headers.forEach(header => {
                 tableHTML += `<th>${header}</th>`;
             });
