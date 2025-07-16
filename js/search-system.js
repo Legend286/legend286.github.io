@@ -55,21 +55,23 @@ export class SearchSystem {
             return;
         }
         
-        // Check for Mirrorwitch encounter trigger
+        // Check for Mirrorwitch encounter trigger FIRST (before any other processing)
         if (CONFIG.unlockPhrases['mirrorwitch-encounter'] && 
             CONFIG.unlockPhrases['mirrorwitch-encounter'].includes(query)) {
+            console.log('🪞 Mirrorwitch trigger detected:', query);
             this.triggerMirrorwitchEncounter();
             return;
         }
         
         // Check for other unlock phrases
         for (const [unlockType, phrases] of Object.entries(CONFIG.unlockPhrases)) {
-            if (phrases.includes(query)) {
+            if (unlockType !== 'mirrorwitch-encounter' && phrases.includes(query)) {
                 this.handleUnlock(unlockType);
                 return;
             }
         }
         
+        // Only proceed with regular search if no triggers were found
         const results = new Map(); // Use Map to avoid duplicates
         const queryWords = query.split(/\s+/).filter(word => word.length > 0);
         

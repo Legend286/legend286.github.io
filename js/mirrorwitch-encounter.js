@@ -110,13 +110,18 @@ export class MirrorwitchEncounter {
     startGlitching() {
         if (!this.imageElement) return;
 
-        // Random glitch intervals (very rare)
-        this.glitchInterval = setInterval(() => {
-            // 2% chance every 3-8 seconds for a glitch
-            if (Math.random() < 0.02) {
-                this.triggerGlitch();
-            }
-        }, Math.random() * 5000 + 3000);
+        // Variable glitch intervals (10-60 seconds)
+        this.scheduleNextGlitch();
+    }
+
+    scheduleNextGlitch() {
+        // Random interval between 10-60 seconds
+        const interval = Math.random() * 50000 + 10000; // 10-60 seconds
+        
+        setTimeout(() => {
+            this.triggerGlitch();
+            this.scheduleNextGlitch(); // Schedule the next one
+        }, interval);
     }
 
     triggerGlitch() {
@@ -125,20 +130,13 @@ export class MirrorwitchEncounter {
         // Switch to scary image
         this.imageElement.src = this.scaryImage.src;
         
-        // Add glitch effects
-        this.imageElement.classList.add('glitching');
-        
         // Play creepy audio
         this.playCreepyAudio();
         
-        // Random glitch duration (brief)
-        const glitchDuration = Math.random() * 800 + 200; // 200-1000ms
-        
+        // Switch back after 0.3 seconds
         setTimeout(() => {
-            // Switch back to normal image
             this.imageElement.src = this.normalImage.src;
-            this.imageElement.classList.remove('glitching');
-        }, glitchDuration);
+        }, 300);
     }
 
     startCreepyAudio() {

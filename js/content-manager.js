@@ -12,6 +12,11 @@ export class ContentManager {
         this.homeConfig = null;
         this.audioSystem = audioSystem;
         this.bypassCache = false; // Flag to control cache bypass for development
+        this.mirrorwitchEncounter = null; // Will be set by main system
+    }
+
+    setMirrorwitchEncounter(encounter) {
+        this.mirrorwitchEncounter = encounter;
     }
 
     async init() {
@@ -158,6 +163,18 @@ export class ContentManager {
             // Handle special case for home page
             if (contentId === 'home') {
                 this.loadHomePage();
+                return;
+            }
+            
+            // Handle special case for Mirrorwitch encounter
+            if (contentId === 'mirrorwitch-encounter') {
+                console.log('🪞 Mirrorwitch encounter triggered via URL');
+                if (this.mirrorwitchEncounter) {
+                    this.mirrorwitchEncounter.startEncounter();
+                } else {
+                    console.error('❌ Mirrorwitch encounter system not available');
+                    this.loadHomePage();
+                }
                 return;
             }
             

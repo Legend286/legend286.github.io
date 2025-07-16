@@ -38,6 +38,7 @@ class ArchiveSystem {
             
             // Connect systems
             this.searchSystem.setMirrorwitchEncounter(this.mirrorwitchEncounter);
+            this.contentManager.setMirrorwitchEncounter(this.mirrorwitchEncounter);
             
             this.isInitialized = true;
             
