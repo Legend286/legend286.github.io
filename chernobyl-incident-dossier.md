@@ -83,7 +83,7 @@ Civilians later report:
 ## 🧾 FIELD REPORT – AGENT THATCHER (CLASSIFIED LOG 04/29/86)
 
 > "It didn't melt down. It cracked *open*.  
-> The heat was just the excuse — the real fire came from whatever was behind that air.
+> The heat was just the excuse — the real fire came from whatever was behind that air.  
 
 [AUDIO:chernobyl-incident_heat-was-just-the-excuse.mp3:Site Log Recording - "The heat was just the excuse":field-recording]
 

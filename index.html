@@ -32,7 +32,7 @@
                     <span class="clearance-info">CLEARANCE LEVEL: PUBLIC ORIENTATION</span>
                 </div>
                 <div class="header-top">
-                    <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                    <button class="mobile-menu-toggle" id="mobile-menu-btn">
                         <span class="menu-icon">☰</span>
                         MENU
                     </button>
@@ -54,16 +54,16 @@
         <div class="mobile-overlay" id="mobile-overlay"></div>
         
         <!-- Navigation Sidebar -->
-        <nav class="sidebar" id="sidebar">
-            <button class="sidebar-close" id="sidebar-close">✕ CLOSE MENU</button>
+        <nav class="site-navigation" id="site-navigation">
+            <button class="sidebar-close" id="mobile-menu-close">✕ CLOSE MENU</button>
             <!-- Navigation sections will be dynamically generated -->
-            <div id="dynamic-navigation">
+            <div class="nav-menu" id="nav-menu">
                 <!-- Content loaded by JavaScript from content-config.json -->
             </div>
         </nav>
 
         <!-- Main Content Area -->
-        <main class="main-content" id="main-content">
+        <main class="main-content" id="main-container">
             <div class="content-header">
                 <div class="file-info">
                     <span class="file-number" id="file-number">ARCHIVE OVERVIEW</span>
@@ -97,6 +97,6 @@
         </footer>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html> 

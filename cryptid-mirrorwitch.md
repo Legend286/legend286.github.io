@@ -99,8 +99,7 @@ She is not always visible — but her *presence* is detectable via:
 
 > “She’s not a ghost. She’s a question that hasn’t been asked yet.  
 > And the moment you look into the mirror — she decides whether *you’re the one meant to ask it.*”
-
-– Archivist M. LeFevre, Psychomemetic Residual Brief
+> – Archivist M. LeFevre, Psychomemetic Residual Brief
 
 ---
 
