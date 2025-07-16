@@ -49,8 +49,7 @@
 > You don’t see him — you see what he isn’t doing, and your brain panics trying to fill it in.  
 > I think I watched him *exit the room before entering it.*  
 > I think I watched myself die, and now I don’t know if it’s already happened.”
-
-– Agent M. Dorrance, Interview Transcript (currently under observation)
+> – Agent M. Dorrance, Interview Transcript (currently under observation)
 
 ---
 

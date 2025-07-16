@@ -45,8 +45,8 @@ Patterns of **non-linear time**, **dimensional leakage**, and **shared symbol se
 - **Language:** Unknown pictoglyphic structure that rearranges nightly. Patterns found to match "mirror writing" used by ritual sects in 18th-century France.
 - **Anomalous Property:** Tablets vibrate at **17 Hz** — known to cause dread and disorientation in humans. Cannot be silenced by containment foam or vacuum storage.
 - **Text Fragment (Translated):**  
-  > *“We worshipped what we knew, and feared what we did not.  
-  But we obeyed that which we could neither name nor forget.”*
+> *"We worshipped what we knew, and feared what we did not."*
+> *"But we obeyed that which we could neither name nor forget."*
 
 - **Connection:** Quote later cited by Dr. Miriam Keel (1976) when she coined the term “Known Unknown.”
 
