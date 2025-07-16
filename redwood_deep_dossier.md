@@ -73,7 +73,8 @@ Satellite mapping shows no irregularity in terrain. However, manned entry teams 
 
 - **Entity Files:** The Folding Man exhibits similar spatial distortion phenomena to Redwood Deep manifestations
 - **Timeline Reference:** Era IV - REDSKY Protocol activation (1973)
-- **Operational Files:** Agent Dawes incident report and psychological evaluation
+- **Operation Files:** REDSKY Protocol contains detailed incident report and containment failure analysis
+- **Agent Files:** Agent Dawes incident report and psychological evaluation
 
 ---
 **END OF FILE 0024**

@@ -69,6 +69,18 @@
             "contentId": "redwood_deep_dossier",
             "fileNumber": "FILE 0024",
             "fileName": "Redwood Deep Site Dossier"
+          },
+          {
+            "title": "OP-RSKY-73 // REDSKY Protocol",
+            "contentId": "redsky-dossier",
+            "fileNumber": "OP-RSKY-73",
+            "fileName": "REDSKY Protocol Operation Dossier"
+          },
+          {
+            "title": "EVT-CH86 // Chernobyl Incident",
+            "contentId": "chernobyl-incident-dossier",
+            "fileNumber": "EVT-CH86",
+            "fileName": "Chernobyl Incident Event Dossier"
           }
         ]
       },
@@ -80,6 +92,24 @@
             "contentId": "cryptid-folding-man",
             "fileNumber": "RB-01",
             "fileName": "The Folding Man Entity Dossier"
+          },
+          {
+            "title": "LK-02 // Birchskin",
+            "contentId": "cryptid-birchskin",
+            "fileNumber": "LK-02",
+            "fileName": "Birchskin Entity Dossier"
+          },
+          {
+            "title": "UNB-06 // The Mirrorwitch",
+            "contentId": "cryptid-mirrorwitch",
+            "fileNumber": "UNB-06",
+            "fileName": "The Mirrorwitch Entity Dossier"
+          },
+          {
+            "title": "SIG-NF-1959 // Numbers Fiend",
+            "contentId": "cryptid-numbers-fiend",
+            "fileNumber": "SIG-NF-1959",
+            "fileName": "Numbers Fiend Signal Dossier"
           },
           {
             "title": "Riftborn Registry",
@@ -189,6 +219,36 @@
         "description": "Intercepted transmissions and anomalous signal analysis from various Bureau monitoring stations.",
         "fileTag": "CLASSIFIED",
         "target": "known_unknown_lore"
+      },
+      {
+        "title": "🚨 REDSKY PROTOCOL",
+        "description": "Operation dossier for the 1973 REDSKY containment action at Redwood Deep. First autonomous unit deployment.",
+        "fileTag": "OP-RSKY-73",
+        "target": "redsky-dossier"
+      },
+      {
+        "title": "🌲 BIRCHSKIN",
+        "description": "Entity dossier for Lost Kin Class LK-02. Predatory lurker entity with perfect forest camouflage and voice mimicry.",
+        "fileTag": "LK-02",
+        "target": "cryptid-birchskin"
+      },
+      {
+        "title": "🪞 THE MIRRORWITCH",
+        "description": "Entity dossier for Unbound Class UNB-06. Spectral manifestation tied to reflective surfaces with reverse precognition.",
+        "fileTag": "UNB-06",
+        "target": "cryptid-mirrorwitch"
+      },
+      {
+        "title": "📡 NUMBERS FIEND",
+        "description": "Signal anomaly dossier for broadcast entity SIG-NF-1959. Shortwave transmissions correlating with targeted deaths.",
+        "fileTag": "SIG-NF-1959",
+        "target": "cryptid-numbers-fiend"
+      },
+      {
+        "title": "☢️ CHERNOBYL INCIDENT",
+        "description": "Event dossier for the 1986 Pripyat Rift breach. Includes classified field recordings and audio evidence.",
+        "fileTag": "EVT-CH86",
+        "target": "chernobyl-incident-dossier"
       }
     ],
     "recentActivity": [
@@ -215,7 +275,7 @@
       "riftborn": "known_unknown_lore",
       "lost kin": "known_unknown_lore",
       "unbound": "known_unknown_lore",
-      "birchskin": "redwood_deep_dossier",
+      "birchskin": "cryptid-birchskin",
       "doorlicker": "redwood_deep_dossier",
       "redwood": "redwood_deep_dossier",
       "forest": "redwood_deep_dossier",
@@ -269,7 +329,18 @@
       "static incident": "20th-century-history-pt2",
       "rift observatory": "20th-century-history-pt2",
       "antarctica": "20th-century-history-pt2",
-      "redsky protocol": "20th-century-history-pt2",
+      "redsky protocol": "redsky-dossier",
+      "redsky": "redsky-dossier",
+      "operation redsky": "redsky-dossier",
+      "op-rsky-73": "redsky-dossier",
+      "agent dawes": "redsky-dossier",
+      "team alpha": "redsky-dossier",
+      "predatory lurker": "redsky-dossier",
+      "autonomous containment": "redsky-dossier",
+      "psychomimetic contagion": "redsky-dossier",
+      "dreaming forest": "redsky-dossier",
+      "audio anomaly": "redsky-dossier",
+      "childglass": "redsky-dossier",
       "folding man": "cryptid-folding-man",
       "rb-01": "cryptid-folding-man",
       "riftborn": "cryptid-folding-man",
@@ -291,7 +362,53 @@
       "crowley": "20th-century-history-pt2",
       "table": "table-test",
       "classification": "table-test",
-      "entity": "table-test"
+      "entity": "table-test",
+      "lk-02": "cryptid-birchskin",
+      "lost kin": "cryptid-birchskin",
+      "predatory lurker": "cryptid-birchskin",
+      "voice mimicry": "cryptid-birchskin",
+      "bark camouflage": "cryptid-birchskin",
+      "forest entity": "cryptid-birchskin",
+      "biomass integration": "cryptid-birchskin",
+      "agent lark": "cryptid-birchskin",
+      "ecological hazard": "cryptid-birchskin",
+      "unb-06": "cryptid-mirrorwitch",
+      "mirrorwitch": "cryptid-mirrorwitch",
+      "mirror witch": "cryptid-mirrorwitch",
+      "unbound": "cryptid-mirrorwitch",
+      "spectral manifestation": "cryptid-mirrorwitch",
+      "reflective surfaces": "cryptid-mirrorwitch",
+      "reverse whispering": "cryptid-mirrorwitch",
+      "reflection corruption": "cryptid-mirrorwitch",
+      "interrogation looping": "cryptid-mirrorwitch",
+      "memory bleed": "cryptid-mirrorwitch",
+      "witchglass": "cryptid-mirrorwitch",
+      "sig-nf-1959": "cryptid-numbers-fiend",
+      "numbers fiend": "cryptid-numbers-fiend",
+      "signal anomaly": "cryptid-numbers-fiend",
+      "shortwave broadcast": "cryptid-numbers-fiend",
+      "memetic vector": "cryptid-numbers-fiend",
+      "auditory surveillance": "cryptid-numbers-fiend",
+      "correlated deaths": "cryptid-numbers-fiend",
+      "jam-sight": "cryptid-numbers-fiend",
+      "apophenic drift": "cryptid-numbers-fiend",
+      "receiver scramble": "cryptid-numbers-fiend",
+      "audio anomaly": "cryptid-numbers-fiend",
+      "evt-ch86": "chernobyl-incident-dossier",
+      "chernobyl": "chernobyl-incident-dossier",
+      "chornobyl": "chernobyl-incident-dossier",
+      "pripyat": "chernobyl-incident-dossier",
+      "reactor four": "chernobyl-incident-dossier",
+      "rift breach": "chernobyl-incident-dossier",
+      "ironshelter": "chernobyl-incident-dossier",
+      "burnt crown": "chernobyl-incident-dossier",
+      "reverse whispers": "chernobyl-incident-dossier",
+      "ukrainian whispers": "chernobyl-incident-dossier",
+      "almaz echo": "chernobyl-incident-dossier",
+      "agent thatcher": "chernobyl-incident-dossier",
+      "temporal feedback": "chernobyl-incident-dossier",
+      "exclusion zone": "chernobyl-incident-dossier",
+      "stalker incidents": "chernobyl-incident-dossier"
     }
   },
   "templates": {

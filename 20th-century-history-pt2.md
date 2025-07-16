@@ -65,13 +65,15 @@ The era is defined by:
 ---
 
 ### 🔹 1973 – *REDSKY Protocol Triggered (Redwood Deep)*
-- **Trigger:** Agent Dawes records “a tree screamed in my voice” before collapsing.
+- **Trigger:** Agent Dawes records "a tree screamed in my voice" before collapsing.
 - **Entity Involvement:** **Birchskin**, a predatory mimic, confirmed active.
 - **Anomaly:** One tent canvas was 30 years older than its manufacture date.
 - **Protocol Outcome:**  
   - Zone permanently delisted  
   - Redwood Deep marked as Tier III ecological hazard  
   - Local legends encouraged to prevent further visitation
+
+**→ See also:** REDSKY Protocol operation dossier for complete incident analysis and containment failure report.
 
 ---
 

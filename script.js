@@ -654,9 +654,16 @@ class ArchiveSystem {
             'first_lore_document': 'FILE 0001',
             'known_unknown_lore': 'MAIN ARCHIVE',
             'redwood_deep_dossier': 'FILE 0024',
+            'redsky-dossier': 'OP-RSKY-73',
+            'cryptid-folding-man': 'RB-01',
+            'cryptid-birchskin': 'LK-02',
+            'cryptid-mirrorwitch': 'UNB-06',
+            'cryptid-numbers-fiend': 'SIG-NF-1959',
+            'chernobyl-incident-dossier': 'EVT-CH86',
             'pre-history': 'ERA I TIMELINE',
             'early-history': 'ERA II TIMELINE',
             '20th-century-history-pt1': 'ERA III TIMELINE',
+            '20th-century-history-pt2': 'ERA IV TIMELINE',
             'table-test': 'TABLE TEST'
         };
         return fileNumbers[contentId] || 'UNKNOWN FILE';
@@ -668,9 +675,16 @@ class ArchiveSystem {
             'first_lore_document': 'Introductory Dossier',
             'known_unknown_lore': 'Known Unknown Lore',
             'redwood_deep_dossier': 'Redwood Deep Site Dossier',
+            'redsky-dossier': 'REDSKY Protocol Operation Dossier',
+            'cryptid-folding-man': 'The Folding Man Entity Dossier',
+            'cryptid-birchskin': 'Birchskin Entity Dossier',
+            'cryptid-mirrorwitch': 'The Mirrorwitch Entity Dossier',
+            'cryptid-numbers-fiend': 'Numbers Fiend Signal Dossier',
+            'chernobyl-incident-dossier': 'Chernobyl Incident Event Dossier',
             'pre-history': 'Prehistory Dossier',
             'early-history': 'Early History Dossier',
             '20th-century-history-pt1': '20th Century History - Part 1',
+            '20th-century-history-pt2': '20th Century History - Part 2',
             'table-test': 'Table Functionality Test'
         };
         return fileNames[contentId] || 'Unknown Document';
@@ -693,6 +707,12 @@ class ArchiveSystem {
         // Code blocks
         html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
         html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+        
+        // Process automatic hyperlinks BEFORE table processing
+        html = this.processAutomaticHyperlinks(html);
+        
+        // Process audio clips BEFORE table processing
+        html = this.processAudioClips(html);
         
         // Process tables BEFORE blockquotes and paragraphs
         html = this.parseMarkdownTables(html);
@@ -749,6 +769,148 @@ class ArchiveSystem {
         html = html.replace(/<p>(<blockquote>.*?<\/blockquote>)<\/p>/gs, '$1');
         html = html.replace(/<p>(<pre>.*?<\/pre>)<\/p>/s, '$1');
         html = html.replace(/<p>(<table>.*?<\/table>)<\/p>/gs, '$1');
+        
+        return html;
+    }
+
+    processAutomaticHyperlinks(html) {
+        // Define reference patterns for automatic linking
+        const linkPatterns = {
+            // Document references
+            'Redwood Deep': 'redwood_deep_dossier',
+            'redwood deep': 'redwood_deep_dossier', 
+            'Birchskin': 'cryptid-birchskin',
+            'The Folding Man': 'cryptid-folding-man',
+            'Folding Man': 'cryptid-folding-man',
+            'RB-01': 'cryptid-folding-man',
+            'LK-02': 'cryptid-birchskin',
+            'Mirrorwitch': 'cryptid-mirrorwitch',
+            'The Mirrorwitch': 'cryptid-mirrorwitch',
+            'UNB-06': 'cryptid-mirrorwitch',
+            'Numbers Fiend': 'cryptid-numbers-fiend',
+            'The Numbers Fiend': 'cryptid-numbers-fiend',
+            'SIG-NF-1959': 'cryptid-numbers-fiend',
+            'Chernobyl Incident': 'chernobyl-incident-dossier',
+            'Chornobyl': 'chernobyl-incident-dossier',
+            'Pripyat': 'chernobyl-incident-dossier',
+            'Reactor Four': 'chernobyl-incident-dossier',
+            'IRONSHELTER': 'chernobyl-incident-dossier',
+            'Operation IRONSHELTER': 'chernobyl-incident-dossier',
+            'BURNT CROWN': 'chernobyl-incident-dossier',
+            'Agent Thatcher': 'chernobyl-incident-dossier',
+            'EVT-CH86': 'chernobyl-incident-dossier',
+            'South Haven incident': 'cryptid-folding-man',
+            'South Haven Breach': 'cryptid-folding-man',
+            
+            // Timeline references  
+            'Era I': 'pre-history',
+            'Era II': 'early-history',
+            'Era III': '20th-century-history-pt1',
+            'Era IV': '20th-century-history-pt2',
+            'Age of Cover-Ups': '20th-century-history-pt2',
+            'prehistory timeline': 'pre-history',
+            'early history': 'early-history',
+            'Tesla Return Signal': '20th-century-history-pt1',
+            'Bureau Formation': '20th-century-history-pt2',
+            'Global Directive 3-S': '20th-century-history-pt2',
+            'REDSKY Protocol': 'redsky-dossier',
+            'REDSKY': 'redsky-dossier',
+            'Operation REDSKY': 'redsky-dossier',
+            
+            // File references
+            'FILE 0001': 'first_lore_document',
+            'FILE 0024': 'redwood_deep_dossier',
+            'Known Unknown Lore': 'known_unknown_lore',
+            'Main Archive': 'known_unknown_lore',
+            
+            // Additional patterns for specific content
+            'Black Site 11': 'known_unknown_lore',
+            'Agent M. Dorrance': 'cryptid-folding-man',
+            'Agent Dawes': 'redsky-dossier',
+            'Team Alpha': 'redsky-dossier',
+            'Rift Observatory': '20th-century-history-pt2'
+        };
+        
+        // Track which terms have already been linked on this page
+        const linkedTerms = new Set();
+        
+        // Process each pattern, but only link the first occurrence
+        for (const [pattern, contentId] of Object.entries(linkPatterns)) {
+            // Skip if this term has already been linked
+            if (linkedTerms.has(pattern.toLowerCase())) {
+                continue;
+            }
+            
+            // Create regex to find first occurrence only - simpler approach for better compatibility
+            const escapedPattern = this.escapeRegex(pattern);
+            const regex = new RegExp(`\\b(${escapedPattern})\\b`, 'i');
+            
+            // Check if pattern exists in the text and not inside existing links/code
+            if (regex.test(html) && !html.includes(`>${pattern}<`) && !html.includes(`">${pattern}</`)) {
+                // Replace only the first occurrence
+                html = html.replace(regex, (match, p1) => {
+                    // Double-check we're not inside a link or code block
+                    const beforeMatch = html.substring(0, html.indexOf(match));
+                    const unclosedLinks = (beforeMatch.match(/<a[^>]*>/g) || []).length - (beforeMatch.match(/<\/a>/g) || []).length;
+                    const unclosedCode = (beforeMatch.match(/<code[^>]*>/g) || []).length - (beforeMatch.match(/<\/code>/g) || []).length;
+                    
+                    if (unclosedLinks > 0 || unclosedCode > 0) {
+                        return match; // Don't replace if inside link or code
+                    }
+                    
+                    linkedTerms.add(pattern.toLowerCase());
+                    return `<a href="#" class="auto-link" data-content="${contentId}" onclick="window.archiveSystem.loadContent('${contentId}'); return false;">${p1}</a>`;
+                });
+            }
+        }
+        
+        return html;
+    }
+    
+    // Helper function to escape regex special characters
+    escapeRegex(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    processAudioClips(html) {
+        // Process audio clips with syntax: [AUDIO:filename.mp3:Label:type] or [AUDIO:path/filename.mp3:Label:type]
+        // Types: field-recording, reverse, static, echo
+        const audioRegex = /\[AUDIO:(.*?):(.*?):(.*?)\]/g;
+        
+        html = html.replace(audioRegex, (match, filename, label, type) => {
+            const audioId = 'audio_' + Math.random().toString(36).substr(2, 9);
+            const isReverse = type === 'reverse';
+            
+            // Determine audio path - if filename contains a path, use it as-is, otherwise use default event path
+            let audioPath;
+            if (filename.includes('/')) {
+                audioPath = `assets/${filename}`;
+            } else {
+                // Default to chernobyl incident recordings for now, can be made more dynamic later
+                audioPath = `assets/events/chernobyl-incident/recordings/${filename}`;
+            }
+            
+            return `
+                <div class="bureau-audio-player" data-type="${type}">
+                    <div class="audio-header">
+                        <span class="audio-label">🎧 ${label}</span>
+                        <span class="audio-type">[${type.toUpperCase()}]</span>
+                    </div>
+                    <div class="audio-controls">
+                        <button class="audio-btn play-btn" onclick="window.archiveSystem.toggleAudio('${audioId}', ${isReverse})" id="btn_${audioId}">
+                            ▶
+                        </button>
+                        <div class="audio-progress">
+                            <div class="progress-bar" id="progress_${audioId}"></div>
+                        </div>
+                        <span class="audio-time" id="time_${audioId}">00:00</span>
+                        ${isReverse ? '<span class="reverse-indicator">⟲ REVERSE</span>' : ''}
+                    </div>
+                    <audio id="${audioId}" src="${audioPath}" preload="none"></audio>
+                    <div class="audio-waveform"></div>
+                </div>
+            `;
+        });
         
         return html;
     }
@@ -1004,7 +1166,11 @@ class ArchiveSystem {
             'home': ['overview', 'introduction', 'bureau', 'archive'],
             'first_lore_document': ['introduction', 'lore', 'document', 'file', '0001'],
             'known_unknown_lore': ['bureau', 'riftborn', 'lost kin', 'unbound', 'lore', 'main'],
-            'redwood_deep_dossier': ['redwood', 'deep', 'site', 'dossier', 'birchskin', 'doorlicker', 'forest'],
+            'redwood_deep_dossier': ['redwood', 'deep', 'site', 'dossier', 'doorlicker', 'forest'],
+            'cryptid-birchskin': ['birchskin', 'lk-02', 'lost', 'kin', 'predatory', 'lurker', 'forest', 'camouflage', 'mimicry', 'voice', 'bark', 'biomass', 'lark', 'redsky'],
+            'cryptid-mirrorwitch': ['mirrorwitch', 'mirror', 'witch', 'unb-06', 'unbound', 'spectral', 'reflection', 'reverse', 'whispering', 'interrogation', 'witchglass', 'memory', 'bleed'],
+            'cryptid-numbers-fiend': ['numbers', 'fiend', 'sig-nf-1959', 'signal', 'broadcast', 'shortwave', 'memetic', 'vector', 'deaths', 'jam-sight', 'apophenic', 'drift'],
+            'chernobyl-incident-dossier': ['chernobyl', 'chornobyl', 'pripyat', 'reactor', 'four', 'rift', 'breach', 'ironshelter', 'burnt', 'crown', 'reverse', 'whispers', 'almaz', 'echo', 'thatcher'],
             'pre-history': ['prehistory', 'timeline', 'era', 'ancient', 'temporal', 'tablets'],
             'early-history': ['early', 'history', 'era ii', 'obscured', 'plague', 'roanoke', 'erasure', 'memetic'],
             '20th-century-history-pt1': ['20th', 'century', 'era iii', 'veil', 'tesla', 'verdun', 'bureau', 'industrial'],
@@ -1268,6 +1434,100 @@ class ArchiveSystem {
                 window.scrollTo(0, this.scrollPosition);
             }
         }
+    }
+
+    // Audio control functions
+    toggleAudio(audioId, isReverse = false) {
+        const audio = document.getElementById(audioId);
+        const btn = document.getElementById('btn_' + audioId);
+        const progressBar = document.getElementById('progress_' + audioId);
+        const timeDisplay = document.getElementById('time_' + audioId);
+        
+        if (!audio) return;
+        
+        if (audio.paused) {
+            // Stop any other playing audio
+            this.stopAllAudio();
+            
+            // Start playing
+            audio.play().then(() => {
+                btn.textContent = '⏸';
+                
+                // Set up progress tracking
+                audio.addEventListener('timeupdate', () => {
+                    const progress = (audio.currentTime / audio.duration) * 100;
+                    progressBar.style.width = progress + '%';
+                    
+                    const currentTime = this.formatTime(audio.currentTime);
+                    timeDisplay.textContent = currentTime;
+                });
+                
+                // Handle end of audio
+                audio.addEventListener('ended', () => {
+                    btn.textContent = '▶';
+                    progressBar.style.width = '0%';
+                    timeDisplay.textContent = '00:00';
+                });
+                
+                // Handle reverse playback
+                if (isReverse) {
+                    this.setupReversePlayback(audio);
+                }
+                
+            }).catch(error => {
+                console.log('Audio play failed:', error);
+                btn.textContent = '⚠';
+                timeDisplay.textContent = 'ERROR';
+            });
+        } else {
+            // Pause
+            audio.pause();
+            btn.textContent = '▶';
+        }
+    }
+    
+    stopAllAudio() {
+        const audioElements = document.querySelectorAll('audio');
+        audioElements.forEach(audio => {
+            if (!audio.paused) {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+        });
+        
+        // Reset all buttons
+        const playBtns = document.querySelectorAll('.play-btn');
+        playBtns.forEach(btn => {
+            btn.textContent = '▶';
+        });
+        
+        // Reset all progress bars
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(bar => {
+            bar.style.width = '0%';
+        });
+        
+        // Reset time displays
+        const timeDisplays = document.querySelectorAll('.audio-time');
+        timeDisplays.forEach(display => {
+            display.textContent = '00:00';
+        });
+    }
+    
+    setupReversePlayback(audio) {
+        // For true reverse playback, we'd need to process the audio file
+        // For now, we'll simulate it with a visual indicator and slower playback
+        audio.playbackRate = 0.8; // Slightly slower for eerie effect
+        
+        // Add visual distortion effect
+        const player = audio.closest('.bureau-audio-player');
+        player.classList.add('reverse-active');
+    }
+    
+    formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
 }
 
