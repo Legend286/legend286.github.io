@@ -7,6 +7,9 @@ class ArchiveSystem {
         this.cache = new Map();
         this.contentCache = new Map();
         this.searchIndex = new Map();
+        this.currentTilePage = 0;
+        this.tilesPerPage = 6;
+        this.homeConfig = null;
         
         this.init();
     }
@@ -15,11 +18,119 @@ class ArchiveSystem {
         this.setupEventListeners();
         this.updateCurrentDate();
         
+        // Build navigation from config
+        await this.buildNavigation();
+        
         // Build search index asynchronously
         await this.buildSearchIndex();
         
         // Load initial content
         this.loadContent('home');
+    }
+
+    async buildNavigation() {
+        try {
+            // Load content configuration
+            const configResponse = await fetch('content-config.json');
+            
+            if (!configResponse.ok) {
+                throw new Error(`Failed to load config: ${configResponse.status}`);
+            }
+            
+            const config = await configResponse.json();
+            
+            if (!config || !config.navigation || !config.navigation.sections) {
+                throw new Error('Invalid config structure - missing navigation.sections');
+            }
+            
+            // Build navigation HTML
+            let navigationHTML = '';
+            
+            for (let sectionIndex = 0; sectionIndex < config.navigation.sections.length; sectionIndex++) {
+                const section = config.navigation.sections[sectionIndex];
+                if (!section || !section.items || !Array.isArray(section.items)) {
+                    console.warn(`Invalid section structure for ${section?.title || 'unknown'}`);
+                    continue;
+                }
+                
+                // Create section ID from title
+                const sectionId = section.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                
+                // Determine if section should be expanded by default (first section)
+                const isExpanded = sectionIndex === 0;
+                const iconClass = isExpanded ? '▼' : '▶';
+                const listClass = isExpanded ? 'nav-list' : 'nav-list collapsed';
+                const headerClass = isExpanded ? 'nav-title collapsible active' : 'nav-title collapsible';
+                
+                navigationHTML += `
+                    <div class="nav-section">
+                        <h3 class="${headerClass}" data-target="${sectionId}">
+                            <span class="nav-icon">${iconClass}</span>
+                            ${section.title}
+                        </h3>
+                        <ul class="${listClass}" id="${sectionId}">
+                `;
+                
+                // Add navigation items
+                for (const item of section.items) {
+                    if (!item) continue;
+                    
+                    if (item.disabled) {
+                        // Disabled item with description
+                        navigationHTML += `
+                            <li>
+                                <a href="#" class="nav-link disabled">
+                                    ${item.title}
+                                    ${item.description ? `<span class="nav-description">${item.description}</span>` : ''}
+                                </a>
+                            </li>
+                        `;
+                    } else if (item.contentId) {
+                        // Active navigation item
+                        const activeClass = item.active ? ' active' : '';
+                        navigationHTML += `
+                            <li><a href="#" data-content="${item.contentId}" class="nav-link${activeClass}">${item.title}</a></li>
+                        `;
+                    }
+                }
+                
+                navigationHTML += `
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            // Insert the generated navigation
+            const dynamicNav = document.getElementById('dynamic-navigation');
+            if (dynamicNav) {
+                dynamicNav.innerHTML = navigationHTML;
+            }
+            
+        } catch (error) {
+            console.error('Error building navigation:', error);
+            // Fallback to basic navigation
+            this.buildFallbackNavigation();
+        }
+    }
+
+    buildFallbackNavigation() {
+        const fallbackHTML = `
+            <div class="nav-section">
+                <h3 class="nav-title collapsible active" data-target="archive-index">
+                    <span class="nav-icon">▼</span>
+                    ARCHIVE INDEX
+                </h3>
+                <ul class="nav-list" id="archive-index">
+                    <li><a href="#" data-content="home" class="nav-link active">Home // Overview</a></li>
+                    <li><a href="#" data-content="known_unknown_lore" class="nav-link">Main Archive</a></li>
+                </ul>
+            </div>
+        `;
+        
+        const dynamicNav = document.getElementById('dynamic-navigation');
+        if (dynamicNav) {
+            dynamicNav.innerHTML = fallbackHTML;
+        }
     }
 
     setupEventListeners() {
@@ -201,8 +312,8 @@ class ArchiveSystem {
             // Handle special case for home content
             if (contentId === 'home') {
                 // Show home content directly without markdown loading
-                setTimeout(() => {
-                    this.showHomeContent();
+                setTimeout(async () => {
+                    await this.showHomeContent();
                     this.updateFileInfo(this.getFileNumber(contentId), this.getFileName(contentId));
                     this.setActiveNavLink(document.querySelector(`[data-content="${contentId}"]`));
                     this.currentContent = contentId;
@@ -240,14 +351,142 @@ class ArchiveSystem {
         }
     }
 
-    showHomeContent() {
+    async showHomeContent() {
+        try {
+            // Load config if not already loaded
+            if (!this.homeConfig) {
+                const configResponse = await fetch('content-config.json');
+                if (!configResponse.ok) {
+                    throw new Error('Failed to load config');
+                }
+                const config = await configResponse.json();
+                this.homeConfig = config.homeContent;
+            }
+            
+            // Get tiles for current page
+            const allTiles = this.homeConfig.contentCards || [];
+            const totalPages = Math.ceil(allTiles.length / this.tilesPerPage);
+            const startIndex = this.currentTilePage * this.tilesPerPage;
+            const endIndex = startIndex + this.tilesPerPage;
+            const currentTiles = allTiles.slice(startIndex, endIndex);
+            
+            const documentContent = document.getElementById('document-content');
+            
+            // Generate tiles HTML
+            const tilesHTML = currentTiles.map(card => `
+                <div class="content-card" data-target="${card.target}">
+                    <h3>${card.title}</h3>
+                    <p>${card.description}</p>
+                    <span class="file-tag">${card.fileTag}</span>
+                </div>
+            `).join('');
+            
+            // Generate pagination controls
+            const paginationHTML = totalPages > 1 ? `
+                <div class="tile-pagination">
+                    <button class="pagination-btn prev" ${this.currentTilePage === 0 ? 'disabled' : ''} 
+                            onclick="archiveSystem.changeTilePage(-1)">
+                        ◀ PREVIOUS
+                    </button>
+                    <span class="page-indicator">
+                        PAGE ${this.currentTilePage + 1} OF ${totalPages}
+                    </span>
+                    <button class="pagination-btn next" ${this.currentTilePage >= totalPages - 1 ? 'disabled' : ''} 
+                            onclick="archiveSystem.changeTilePage(1)">
+                        NEXT ▶
+                    </button>
+                </div>
+            ` : '';
+            
+            // Generate recent activity from config
+            const recentActivityHTML = this.homeConfig.recentActivity?.map(activity => `
+                <div class="log-entry">
+                    <span class="log-date">${activity.date}</span>
+                    <span class="log-action">${activity.action}</span>
+                    <span class="log-file">${activity.file}</span>
+                </div>
+            `).join('') || '';
+            
+            // Create complete home content
+            const homeHTML = `
+                <div class="home-content">
+                    <div class="document-header">
+                        <h1>${this.homeConfig.welcomeMessage || 'WELCOME TO THE KNOWN UNKNOWN ARCHIVE'}</h1>
+                        <div class="classification-stamp">
+                            <div class="stamp-text">DECLASSIFIED</div>
+                            <div class="stamp-subtext">PUBLIC ORIENTATION MATERIALS</div>
+                        </div>
+                    </div>
+
+                    <div class="alert-box">
+                        <strong>SECURITY NOTICE:</strong> ${this.homeConfig.securityNotice || 'This archive contains classified information.'}
+                    </div>
+
+                    <section class="overview-section">
+                        <h2>ARCHIVE CONTENTS</h2>
+                        <div class="content-grid" id="tiles-container">
+                            ${tilesHTML}
+                        </div>
+                        ${paginationHTML}
+                    </section>
+
+                    <section class="recent-activity">
+                        <h2>RECENT ARCHIVE UPDATES</h2>
+                        <div class="activity-log">
+                            ${recentActivityHTML}
+                        </div>
+                    </section>
+                </div>
+            `;
+            
+            // Insert the home content with animation
+            documentContent.innerHTML = homeHTML;
+            
+            // Add animation class after a short delay
+            setTimeout(() => {
+                const tiles = document.querySelectorAll('.content-card');
+                tiles.forEach((tile, index) => {
+                    setTimeout(() => {
+                        tile.classList.add('tile-animate-in');
+                    }, index * 100); // Stagger animation
+                });
+            }, 100);
+            
+            // Re-attach event listeners for content cards
+            this.attachContentCardListeners();
+            
+        } catch (error) {
+            console.error('Error loading home content:', error);
+            this.showFallbackHomeContent();
+        }
+    }
+    
+    changeTilePage(direction) {
+        const allTiles = this.homeConfig?.contentCards || [];
+        const totalPages = Math.ceil(allTiles.length / this.tilesPerPage);
+        
+        // Update current page
+        this.currentTilePage += direction;
+        
+        // Clamp to valid range
+        this.currentTilePage = Math.max(0, Math.min(this.currentTilePage, totalPages - 1));
+        
+        // Animate transition
+        const tilesContainer = document.getElementById('tiles-container');
+        if (tilesContainer) {
+            tilesContainer.classList.add('tiles-transitioning');
+            
+            setTimeout(() => {
+                this.showHomeContent(); // Reload with new page
+            }, 300); // Match transition duration in CSS
+        }
+    }
+    
+    showFallbackHomeContent() {
         const documentContent = document.getElementById('document-content');
         
-        // Clear any previous content
-        documentContent.innerHTML = '';
-        
-        // Create home content dynamically
-        const homeHTML = `
+        // Fallback content if config fails
+        const fallbackHTML = `
             <div class="home-content">
                 <div class="document-header">
                     <h1>WELCOME TO THE KNOWN UNKNOWN ARCHIVE</h1>
@@ -256,67 +495,23 @@ class ArchiveSystem {
                         <div class="stamp-subtext">PUBLIC ORIENTATION MATERIALS</div>
                     </div>
                 </div>
-
                 <div class="alert-box">
-                    <strong>SECURITY NOTICE:</strong> This archive contains information about anomalous entities, locations, and phenomena. All content has been cleared for public dissemination under Protocol C-12.
+                    <strong>ERROR:</strong> Failed to load archive configuration. Displaying fallback content.
                 </div>
-
                 <section class="overview-section">
                     <h2>ARCHIVE CONTENTS</h2>
                     <div class="content-grid">
-                        <div class="content-card" data-target="first_lore_document">
-                            <h3>📋 INTRODUCTORY BRIEFING</h3>
-                            <p>New to the Known Unknown phenomenon? Start here for basic orientation and classification protocols.</p>
-                            <span class="file-tag">FILE 0001</span>
-                        </div>
-                        
                         <div class="content-card" data-target="known_unknown_lore">
                             <h3>🗂️ MAIN ARCHIVE</h3>
                             <p>Complete lore dossier including factions, entities, timeline, and world overview.</p>
                             <span class="file-tag">COMPREHENSIVE</span>
-                        </div>
-                        
-                        <div class="content-card" data-target="redwood_deep_dossier">
-                            <h3>🌲 REDWOOD DEEP</h3>
-                            <p>Site dossier for anomalous ecological zone. Contains entity classifications and incident reports.</p>
-                            <span class="file-tag">FILE 0024</span>
-                        </div>
-                        
-                        <div class="content-card" data-target="pre-history">
-                            <h3>🗿 PREHISTORY TIMELINE</h3>
-                            <p>Era I chronological record of anomalous events from 6000 BCE to 0 CE. Ancient rift breaches and temporal artifacts.</p>
-                            <span class="file-tag">ERA I</span>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="recent-activity">
-                    <h2>RECENT ARCHIVE UPDATES</h2>
-                    <div class="activity-log">
-                        <div class="log-entry">
-                            <span class="log-date">2024.12.XX</span>
-                            <span class="log-action">CREATED</span>
-                            <span class="log-file">Redwood Deep Site Dossier</span>
-                        </div>
-                        <div class="log-entry">
-                            <span class="log-date">2024.12.XX</span>
-                            <span class="log-action">UPDATED</span>
-                            <span class="log-file">Known Unknown Lore Database</span>
-                        </div>
-                        <div class="log-entry">
-                            <span class="log-date">2024.12.XX</span>
-                            <span class="log-action">INITIATED</span>
-                            <span class="log-file">Digital Archive Project</span>
                         </div>
                     </div>
                 </section>
             </div>
         `;
         
-        // Insert the home content
-        documentContent.innerHTML = homeHTML;
-        
-        // Re-attach event listeners for content cards
+        documentContent.innerHTML = fallbackHTML;
         this.attachContentCardListeners();
     }
 
@@ -1080,7 +1275,7 @@ class ArchiveSystem {
 let archiveSystem;
 document.addEventListener('DOMContentLoaded', async () => {
     archiveSystem = new ArchiveSystem();
-    // Make it globally accessible for search suggestions
+    // Make it globally accessible for search suggestions and pagination
     window.archiveSystem = archiveSystem;
 });
 

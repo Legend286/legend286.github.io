@@ -48,6 +48,12 @@
             "fileName": "20th Century History - Part 1"
           },
           {
+            "title": "Era IV // Age of Cover-Ups",
+            "contentId": "20th-century-history-pt2",
+            "fileNumber": "ERA IV TIMELINE",
+            "fileName": "20th Century History - Part 2"
+          },
+          {
             "title": "Table Test // Demo",
             "contentId": "table-test",
             "fileNumber": "TABLE TEST",
@@ -69,6 +75,12 @@
       {
         "title": "ENTITY CLASSIFICATIONS",
         "items": [
+          {
+            "title": "RB-01 // The Folding Man",
+            "contentId": "cryptid-folding-man",
+            "fileNumber": "RB-01",
+            "fileName": "The Folding Man Entity Dossier"
+          },
           {
             "title": "Riftborn Registry",
             "disabled": true,
@@ -131,6 +143,12 @@
         "target": "redwood_deep_dossier"
       },
       {
+        "title": "🔺 THE FOLDING MAN",
+        "description": "Entity dossier for Riftborn Class RB-01. High distortion cognitive hazard from the 1983 South Haven incident.",
+        "fileTag": "RB-01",
+        "target": "cryptid-folding-man"
+      },
+      {
         "title": "🗿 PREHISTORY TIMELINE",
         "description": "Era I chronological record of anomalous events from 6000 BCE to 0 CE. Ancient rift breaches and temporal artifacts.",
         "fileTag": "ERA I",
@@ -143,10 +161,34 @@
         "target": "early-history"
       },
       {
-        "title": "🛰️ 20TH CENTURY TIMELINE",
+        "title": "🛰️ 20TH CENTURY PT.1",
         "description": "Era III record from 1900-1946. Industrial anomalies, Tesla signals, and the founding of the Bureau.",
         "fileTag": "ERA III",
         "target": "20th-century-history-pt1"
+      },
+      {
+        "title": "🕴️ 20TH CENTURY PT.2",
+        "description": "Era IV record from 1947-1989. The age of cover-ups, black budget operations, and weaponized anomalies.",
+        "fileTag": "ERA IV",
+        "target": "20th-century-history-pt2"
+      },
+      {
+        "title": "📊 CLASSIFICATION TABLES",
+        "description": "Demonstration of entity classification table formats and data structure examples.",
+        "fileTag": "DEMO",
+        "target": "table-test"
+      },
+      {
+        "title": "🔍 SEARCH PROTOCOLS",
+        "description": "How to effectively search the archive using classification codes, keywords, and boolean operators.",
+        "fileTag": "GUIDE",
+        "target": "home"
+      },
+      {
+        "title": "📡 COMMUNICATION LOGS",
+        "description": "Intercepted transmissions and anomalous signal analysis from various Bureau monitoring stations.",
+        "fileTag": "CLASSIFIED",
+        "target": "known_unknown_lore"
       }
     ],
     "recentActivity": [
@@ -216,6 +258,37 @@
       "convoy": "20th-century-history-pt1",
       "ossaconda": "20th-century-history-pt1",
       "industrial": "20th-century-history-pt1",
+      "era iv": "20th-century-history-pt2",
+      "age of cover-ups": "20th-century-history-pt2",
+      "cover-ups": "20th-century-history-pt2",
+      "bureau formation": "20th-century-history-pt2",
+      "global directive": "20th-century-history-pt2",
+      "numbers fiend": "20th-century-history-pt2",
+      "broadcast": "20th-century-history-pt2",
+      "shortwave": "20th-century-history-pt2",
+      "static incident": "20th-century-history-pt2",
+      "rift observatory": "20th-century-history-pt2",
+      "antarctica": "20th-century-history-pt2",
+      "redsky protocol": "20th-century-history-pt2",
+      "folding man": "cryptid-folding-man",
+      "rb-01": "cryptid-folding-man",
+      "riftborn": "cryptid-folding-man",
+      "south haven": "cryptid-folding-man",
+      "spatial inversion": "cryptid-folding-man",
+      "temporal displacement": "cryptid-folding-man",
+      "memory fracture": "cryptid-folding-man",
+      "cognitive hazard": "cryptid-folding-man",
+      "visual distortion": "cryptid-folding-man",
+      "non-euclidean": "cryptid-folding-man",
+      "entity dossier": "cryptid-folding-man",
+      "dorrance": "cryptid-folding-man",
+      "amnestics": "20th-century-history-pt2",
+      "containment protocols": "20th-century-history-pt2",
+      "black budget": "20th-century-history-pt2",
+      "cold war": "20th-century-history-pt2",
+      "weaponized": "20th-century-history-pt2",
+      "receiver scramble": "20th-century-history-pt2",
+      "crowley": "20th-century-history-pt2",
       "table": "table-test",
       "classification": "table-test",
       "entity": "table-test"
