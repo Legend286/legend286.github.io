@@ -660,6 +660,7 @@ class ArchiveSystem {
             'cryptid-mirrorwitch': 'UNB-06',
             'cryptid-numbers-fiend': 'SIG-NF-1959',
             'chernobyl-incident-dossier': 'EVT-CH86',
+            'mirrorwitch-chernobyl-connection': 'UNB-06-CH86-MIRROR',
             'pre-history': 'ERA I TIMELINE',
             'early-history': 'ERA II TIMELINE',
             '20th-century-history-pt1': 'ERA III TIMELINE',
@@ -681,6 +682,7 @@ class ArchiveSystem {
             'cryptid-mirrorwitch': 'The Mirrorwitch Entity Dossier',
             'cryptid-numbers-fiend': 'Numbers Fiend Signal Dossier',
             'chernobyl-incident-dossier': 'Chernobyl Incident Event Dossier',
+            'mirrorwitch-chernobyl-connection': 'Mirrorwitch-Chernobyl Connection',
             'pre-history': 'Prehistory Dossier',
             'early-history': 'Early History Dossier',
             '20th-century-history-pt1': '20th Century History - Part 1',
@@ -799,6 +801,10 @@ class ArchiveSystem {
             'BURNT CROWN': 'chernobyl-incident-dossier',
             'Agent Thatcher': 'chernobyl-incident-dossier',
             'EVT-CH86': 'chernobyl-incident-dossier',
+            'UNB-06-CH86-MIRROR': 'mirrorwitch-chernobyl-connection',
+            'Mirrorwitch-Chernobyl Connection': 'mirrorwitch-chernobyl-connection',
+            'Mirrorwitch Connection': 'mirrorwitch-chernobyl-connection',
+            'Mirror Protocol': 'mirrorwitch-chernobyl-connection',
             'South Haven incident': 'cryptid-folding-man',
             'South Haven Breach': 'cryptid-folding-man',
             
@@ -881,17 +887,41 @@ class ArchiveSystem {
             const audioId = 'audio_' + Math.random().toString(36).substr(2, 9);
             const isReverse = type === 'reverse';
             
-            // Determine audio path - if filename contains a path, use it as-is, otherwise use default event path
+            // Determine audio path and file type (steganographic wav vs normal mp3)
             let audioPath;
+            let actualFilename = filename;
+            
             if (filename.includes('/')) {
                 audioPath = `assets/${filename}`;
             } else {
-                // Default to chernobyl incident recordings for now, can be made more dynamic later
-                audioPath = `assets/events/chernobyl-incident/recordings/${filename}`;
+                // For Chernobyl content, potentially use steganographic wav files per-file
+                if (this.isChernobylContent()) {
+                    // Check if wav version exists for this file
+                    const baseName = filename.replace('.mp3', '');
+                    const steganographicFiles = [
+                        'chernobyl-incident_heat-was-just-the-excuse',
+                        'chernobyl-incident_didnt-have-time-to-evacuate',
+                        'chernobyl-incident_we-are-already-debris'
+                    ];
+                    
+                    // Check if this specific file should be steganographic
+                    const isFileEnhanced = this.shouldUseFileStegano(baseName);
+                    
+                    if (steganographicFiles.includes(baseName) && isFileEnhanced) {
+                        actualFilename = baseName + '.wav';
+                        // Add subtle indicator for steganographic version
+                        label = label + ' [ENHANCED]';
+                    }
+                }
+                
+                audioPath = `assets/events/chernobyl-incident/recordings/${actualFilename}`;
             }
             
+            const isEnhanced = actualFilename.endsWith('.wav');
+            const playerClass = isEnhanced ? 'bureau-audio-player enhanced' : 'bureau-audio-player';
+            
             return `
-                <div class="bureau-audio-player" data-type="${type}">
+                <div class="${playerClass}" data-type="${type}">
                     <div class="audio-header">
                         <span class="audio-label">🎧 ${label}</span>
                         <span class="audio-type">[${type.toUpperCase()}]</span>
@@ -1194,6 +1224,19 @@ class ArchiveSystem {
         
         if (!query) {
             this.showSearchResults([]);
+            return;
+        }
+        
+        // Check for steganographic unlock phrases (Mirrorwitch easter egg)
+        const mirrorPhrases = [
+            'ты в зеркале',
+            'ty v zerkale',
+            'тывзеркале',
+            'tyvzerkale'
+        ];
+        
+        if (mirrorPhrases.includes(query.replace(/\s+/g, ''))) {
+            this.unlockMirrorwitchConnection();
             return;
         }
         
@@ -1529,6 +1572,130 @@ class ArchiveSystem {
         const secs = Math.floor(seconds % 60);
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
+    
+    // Per-file steganographic audio system
+    shouldUseFileStegano(baseName) {
+        // Check if this specific file should use steganographic version
+        const fileKey = `stegano_${baseName}`;
+        
+        // Check if we've already decided for this file in this session
+        const existingDecision = sessionStorage.getItem(fileKey);
+        if (existingDecision !== null) {
+            return existingDecision === 'true';
+        }
+        
+        // Track visit count for statistical purposes
+        const visitKey = 'chernobyl_visits';
+        let visits = parseInt(localStorage.getItem(visitKey) || '0');
+        
+        // Only increment visit count once per session
+        if (!sessionStorage.getItem('visit_counted')) {
+            visits++;
+            localStorage.setItem(visitKey, visits.toString());
+            sessionStorage.setItem('visit_counted', 'true');
+        }
+        
+        // Each file has independent ~5% chance to be enhanced
+        const shouldEnhance = Math.random() < 0.05; // 5% chance per file
+        
+        // Store decision for this file in this session
+        sessionStorage.setItem(fileKey, shouldEnhance.toString());
+        
+        // Log for debugging
+        if (shouldEnhance) {
+            console.log(`🔊 ENHANCED AUDIO: File "${baseName}" randomly enhanced (visit ${visits})`);
+            console.log(`🔍 To manually enhance file: sessionStorage.setItem("stegano_${baseName}", "true"); location.reload();`);
+        }
+        
+                 return shouldEnhance;
+    }
+    
+    // Testing and debugging functions for steganographic system
+    activateAllFileStegano() {
+        const steganographicFiles = [
+            'chernobyl-incident_heat-was-just-the-excuse',
+            'chernobyl-incident_didnt-have-time-to-evacuate',
+            'chernobyl-incident_we-are-already-debris'
+        ];
+        
+        steganographicFiles.forEach(baseName => {
+            sessionStorage.setItem(`stegano_${baseName}`, 'true');
+        });
+        
+        console.log('🔊 All steganographic files activated for this session');
+        console.log('🔄 Reload the page to see enhanced versions');
+    }
+    
+    deactivateAllFileStegano() {
+        const steganographicFiles = [
+            'chernobyl-incident_heat-was-just-the-excuse',
+            'chernobyl-incident_didnt-have-time-to-evacuate',
+            'chernobyl-incident_we-are-already-debris'
+        ];
+        
+        steganographicFiles.forEach(baseName => {
+            sessionStorage.removeItem(`stegano_${baseName}`);
+        });
+        
+        console.log('🔇 All steganographic files deactivated for this session');
+        console.log('🔄 Reload the page to see normal versions');
+    }
+    
+    checkFileSteganoStatus() {
+        const steganographicFiles = [
+            'chernobyl-incident_heat-was-just-the-excuse',
+            'chernobyl-incident_didnt-have-time-to-evacuate',
+            'chernobyl-incident_we-are-already-debris'
+        ];
+        
+        console.log('📊 Current steganographic file status:');
+        steganographicFiles.forEach(baseName => {
+            const status = sessionStorage.getItem(`stegano_${baseName}`);
+            const isEnhanced = status === 'true';
+            console.log(`   ${baseName}: ${isEnhanced ? '🔊 ENHANCED' : '🔇 Normal'}`);
+        });
+        
+        const visits = localStorage.getItem('chernobyl_visits') || '0';
+        console.log(`📈 Total Chernobyl visits: ${visits}`);
+    }
+    
+    unlockMirrorwitchConnection() {
+        // Clear search input
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+        
+        console.log('🪞 STEGANOGRAPHIC UNLOCK: Mirrorwitch-Chernobyl connection accessed');
+        console.log('🔍 Authentication phrase detected: "ТЫ В ЗЕРКАЛЕ"');
+        
+        // Mark as unlocked for this session
+        sessionStorage.setItem('mirrorwitch_unlocked', 'true');
+        
+        // Load the hidden dossier
+        this.loadContent('mirrorwitch-chernobyl-connection');
+        
+        // Update URL and navigation state
+        this.currentContent = 'mirrorwitch-chernobyl-connection';
+        window.history.pushState(
+            { content: 'mirrorwitch-chernobyl-connection' },
+            'Mirrorwitch-Chernobyl Connection // KNOWN UNKNOWN ARCHIVE',
+            '#mirrorwitch-chernobyl-connection'
+        );
+        
+        // Update file info
+        this.updateFileInfo('UNB-06-CH86-MIRROR', 'Mirrorwitch-Chernobyl Connection');
+        
+        // Clear active nav links since this is a hidden page
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+    }
+    
+    isChernobylContent() {
+        // Check if current content is Chernobyl-related
+        return this.currentContent === 'chernobyl-incident-dossier';
+    }
 }
 
 // Initialize the archive system when the page loads
@@ -1537,6 +1704,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     archiveSystem = new ArchiveSystem();
     // Make it globally accessible for search suggestions and pagination
     window.archiveSystem = archiveSystem;
+    
+    // Make steganographic testing functions available globally
+    window.activateAllStegano = () => archiveSystem.activateAllFileStegano();
+    window.deactivateAllStegano = () => archiveSystem.deactivateAllFileStegano();
+    window.checkSteganStatus = () => archiveSystem.checkFileSteganoStatus();
+    window.unlockMirrorwitch = () => archiveSystem.unlockMirrorwitchConnection();
 });
 
 // Add some atmospheric effects

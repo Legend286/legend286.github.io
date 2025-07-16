@@ -47,6 +47,8 @@ Then:
 - Rift pulses through coolant tunnels.  
 - Surveillance film distorts — footage loops one second forward and one backward repeatedly.
 
+[AUDIO:chernobyl-incident_we-are-already-debris.mp3:Emergency Transmission - "We are already debris":reverse]
+
 Civilians later report:
 - People “walking out of walls”  
 - “Windows that showed things they never had before”  

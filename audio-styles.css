@@ -38,6 +38,22 @@
     font-weight: bold;
 }
 
+/* Enhanced/Steganographic audio indicator */
+.bureau-audio-player.enhanced .audio-label {
+    color: var(--accent-red);
+    animation: subtle-pulse 2s infinite;
+}
+
+.bureau-audio-player.enhanced {
+    border-color: var(--accent-red);
+    box-shadow: 0 0 10px rgba(204, 51, 51, 0.3);
+}
+
+@keyframes subtle-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
 .audio-type {
     color: var(--text-muted);
     font-size: 0.75em;
