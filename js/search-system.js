@@ -7,7 +7,22 @@ export class SearchSystem {
     constructor(contentManager) {
         this.searchIndex = new Map();
         this.contentManager = contentManager;
-        this.buildSearchIndex();
+        this.searchInput = null;
+        this.searchResults = null;
+        this.isSearchActive = false;
+        this.currentQuery = '';
+        this.searchTimeout = null;
+        this.mirrorwitchEncounter = null; // Will be set by main system
+    }
+
+    setMirrorwitchEncounter(encounter) {
+        this.mirrorwitchEncounter = encounter;
+    }
+
+    async init() {
+        await this.buildSearchIndex();
+        this.setupSearchListeners();
+        console.log('✅ Search System initialized');
     }
 
     async buildSearchIndex() {
@@ -40,10 +55,19 @@ export class SearchSystem {
             return;
         }
         
-        // Check for steganographic unlock phrases (Mirrorwitch easter egg)
-        if (CONFIG.unlockPhrases.mirrorwitch.includes(query.replace(/\s+/g, ''))) {
-            this.unlockMirrorwitchConnection();
+        // Check for Mirrorwitch encounter trigger
+        if (CONFIG.unlockPhrases['mirrorwitch-encounter'] && 
+            CONFIG.unlockPhrases['mirrorwitch-encounter'].includes(query)) {
+            this.triggerMirrorwitchEncounter();
             return;
+        }
+        
+        // Check for other unlock phrases
+        for (const [unlockType, phrases] of Object.entries(CONFIG.unlockPhrases)) {
+            if (phrases.includes(query)) {
+                this.handleUnlock(unlockType);
+                return;
+            }
         }
         
         const results = new Map(); // Use Map to avoid duplicates
@@ -95,6 +119,51 @@ export class SearchSystem {
             .slice(0, CONFIG.ui.maxSearchResults);
         
         this.showSearchResults(sortedResults, query);
+    }
+
+    triggerMirrorwitchEncounter() {
+        if (!this.mirrorwitchEncounter) {
+            console.error('❌ Mirrorwitch encounter system not available');
+            return;
+        }
+        
+        // Clear search input
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+        
+        console.log('🪞 MIRRORWITCH ENCOUNTER TRIGGERED');
+        console.log('🔍 Ukrainian phrase detected: "Я БАЧУ ТЕБЕ ІЗ СЕРЕДИНИ"');
+        
+        // Start the encounter
+        this.mirrorwitchEncounter.startEncounter();
+        
+        // Update URL to reflect the encounter
+        window.history.pushState(
+            { content: 'mirrorwitch-encounter' },
+            'Mirrorwitch Encounter // KNOWN UNKNOWN ARCHIVE',
+            '#mirrorwitch-encounter'
+        );
+    }
+
+    handleUnlock(unlockType) {
+        // Clear search input
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+        
+        console.log(`🔓 Unlock triggered: ${unlockType}`);
+        
+        // Handle different unlock types
+        switch (unlockType) {
+            case 'garry-the-cat':
+                this.contentManager.loadContent('garry-the-cat');
+                break;
+            default:
+                console.log(`Unknown unlock type: ${unlockType}`);
+        }
     }
 
     showSearchResults(results, query = '') {
@@ -201,39 +270,6 @@ export class SearchSystem {
         this.showSearchResults([]);
     }
 
-    unlockMirrorwitchConnection() {
-        // Clear search input
-        const searchInput = document.getElementById('search-input');
-        if (searchInput) {
-            searchInput.value = '';
-        }
-        
-        console.log('🪞 STEGANOGRAPHIC UNLOCK: Mirrorwitch-Chernobyl connection accessed');
-        console.log('🔍 Authentication phrase detected: "ТЫ В ЗЕРКАЛЕ"');
-        
-        // Mark as unlocked for this session
-        sessionStorage.setItem('mirrorwitch_unlocked', 'true');
-        
-        // Load the hidden dossier through content manager
-        this.contentManager.loadContent('mirrorwitch-chernobyl-connection');
-        
-        // Update URL and navigation state
-        this.contentManager.currentContent = 'mirrorwitch-chernobyl-connection';
-        window.history.pushState(
-            { content: 'mirrorwitch-chernobyl-connection' },
-            'Mirrorwitch-Chernobyl Connection // KNOWN UNKNOWN ARCHIVE',
-            '#mirrorwitch-chernobyl-connection'
-        );
-        
-        // Update file info
-        this.contentManager.updateFileInfo('UNB-06-CH86-MIRROR', 'Mirrorwitch-Chernobyl Connection');
-        
-        // Clear active nav links since this is a hidden page
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('active');
-        });
-    }
-
     // Set up search event listeners
     setupSearchListeners() {
         const searchInput = document.getElementById('search-input');
@@ -275,4 +311,4 @@ export class SearchSystem {
             }
         });
     }
-} 
+}

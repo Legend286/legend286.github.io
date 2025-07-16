@@ -1,34 +1,46 @@
 // Main module for Known Unknown Archive
 // Coordinates all other modules and handles initialization
 
-import { AudioSystem } from './audio-system.js';
 import { ContentManager } from './content-manager.js';
-import { SearchSystem } from './search-system.js';
 import { UIManager } from './ui-manager.js';
+import { AudioSystem } from './audio-system.js';
+import { SearchSystem } from './search-system.js';
+import { MirrorwitchEncounter } from './mirrorwitch-encounter.js';
 
 class ArchiveSystem {
     constructor() {
-        // Initialize all subsystems
-        this.audioSystem = new AudioSystem();
-        this.contentManager = new ContentManager(this.audioSystem);
-        this.searchSystem = new SearchSystem(this.contentManager);
-        this.uiManager = new UIManager(this.contentManager);
+        this.audioSystem = null;
+        this.contentManager = null;
+        this.uiManager = null;
+        this.searchSystem = null;
+        this.mirrorwitchEncounter = null;
+        this.isInitialized = false;
     }
 
     async init() {
-        console.log('🏛️ Initializing Known Unknown Archive...');
-        
         try {
-            // Initialize UI manager first (for mobile menu, atmospheric effects)
-            this.uiManager.init();
-            console.log('✅ UI Manager initialized');
+            console.log('🚀 Initializing Archive System...');
             
-            // Set up search system
-            this.searchSystem.setupSearchListeners();
-            console.log('✅ Search System initialized');
+            // Initialize subsystems
+            this.audioSystem = new AudioSystem();
+            this.contentManager = new ContentManager(this.audioSystem);
+            this.searchSystem = new SearchSystem(this.contentManager);
+            this.uiManager = new UIManager(this.contentManager);
+            this.mirrorwitchEncounter = new MirrorwitchEncounter();
             
-            // Initialize content manager (builds navigation and loads initial content)
+            // Initialize systems that have init methods
             await this.contentManager.init();
+            await this.searchSystem.init();
+            await this.mirrorwitchEncounter.initialize();
+            
+            // Initialize UI manager (doesn't have async init)
+            this.uiManager.init();
+            
+            // Connect systems
+            this.searchSystem.setMirrorwitchEncounter(this.mirrorwitchEncounter);
+            
+            this.isInitialized = true;
+            
             console.log('✅ Content Manager initialized');
             
             // Handle initial URL routing
@@ -42,6 +54,7 @@ class ArchiveSystem {
             console.log('  - Ctrl/Cmd + Shift + R: Clear cache and reload');
             console.log('  - archiveSystem.clearCache(): Clear all cached content');
             console.log('  - archiveSystem.reloadContent(): Reload current content');
+            console.log('🪞 Mirrorwitch Trigger: Type "Я БАЧУ ТЕБЕ ІЗ СЕРЕДИНИ" in search');
             
         } catch (error) {
             console.error('❌ Archive System initialization failed:', error);

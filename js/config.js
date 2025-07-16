@@ -143,12 +143,8 @@ export const CONFIG = {
 
     // Hidden unlock phrases for easter eggs
     unlockPhrases: {
-        mirrorwitch: [
-            'ты в зеркале',
-            'ty v zerkale',
-            'тывзеркале',
-            'tyvzerkale'
-        ]
+        'garry-the-cat': ['garry', 'garry the cat', 'cat', 'meow'],
+        'mirrorwitch-encounter': ['я бачу тебе із середини', 'ya bachu tebe iz seredyny', 'я бачу тебе', 'ya bachu tebe', 'бачу тебе', 'bachu tebe']
     },
 
     // UI Configuration
