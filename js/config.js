@@ -19,7 +19,9 @@ export const CONFIG = {
         'early-history': 'ERA II TIMELINE',
         '20th-century-history-pt1': 'ERA III TIMELINE',
         '20th-century-history-pt2': 'ERA IV TIMELINE',
-        'table-test': 'TABLE TEST'
+        'table-test': 'TABLE TEST',
+        'agent-thatcher-final-transmission': 'AT-FINAL-042986',
+        'mikola-glushko-logs': 'MG-LOGS-CH86'
     },
 
     // File name mappings
@@ -39,7 +41,9 @@ export const CONFIG = {
         'early-history': 'Early History Dossier',
         '20th-century-history-pt1': '20th Century History - Part 1',
         '20th-century-history-pt2': '20th Century History - Part 2',
-        'table-test': 'Table Functionality Test'
+        'table-test': 'Table Functionality Test',
+        'agent-thatcher-final-transmission': 'Agent Thatcher Final Transmission',
+        'mikola-glushko-logs': 'Mykola Hlushko Personal Logs'
     },
 
     // Auto-linking patterns for cross-references
@@ -131,6 +135,14 @@ export const CONFIG = {
         'mirrorwitch-chernobyl-connection': [
             'mirrorwitch chernobyl', 'connection', 'mirror protocol', 'spectral division', 
             'steganographic', 'hidden', 'classified addendum', 'temporal manipulation'
+        ],
+        'agent-thatcher-final-transmission': [
+            'agent thatcher', 'final transmission', 'at-final-042986', 'temporal dislocation',
+            'second city', 'pripyat memory', 'numbers fiend contact', 'thatcher log'
+        ],
+        'mikola-glushko-logs': [
+            'mykola hlushko', 'mikola glushko', 'personal log', 'plant worker log', 'mg-logs-ch86',
+            'chernobyl logs', 'reactor 4 log', 'technician log', 'mouth of hell', 'second city', 'numbers fiend', 'mirrorwitch'
         ]
     },
 

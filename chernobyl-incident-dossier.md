@@ -50,9 +50,47 @@ Then:
 [AUDIO:chernobyl-incident_we-are-already-debris.mp3:Emergency Transmission - "We are already debris":reverse]
 
 Civilians later report:
-- People “walking out of walls”  
-- “Windows that showed things they never had before”  
+- People "walking out of walls"  
+- "Windows that showed things they never had before"  
 - Ghostly reflections watching people *from the backs of their eyes*
+
+---
+
+## 🧾 FIELD REPORT – AGENT THATCHER (CLASSIFIED LOG 04/29/86)
+
+> "Containment protocols failed within first hour. Reactor building exhibiting anomalous properties - walls appear to 'breathe' and show reflections of non-existent structures.
+
+> Numbers Fiend broadcast confirmed accurate. Agent Petrov and Agent Lyudmila missing. Last transmission mentioned 'second city' visible through reactor walls.
+
+> Mirrorwitch presence confirmed. Not echo - direct manifestation. Been here since before construction.
+
+> This isn't containment breach. It's a remembering. Rift remembering what was here before we built on it.
+
+> Equipment malfunctioning. Temporal artifacts detected. Will attempt final transmission if conditions permit.
+
+> Agent Thatcher, signing off."
+
+*Note: Agent Thatcher's full final transmission was received 7 years later. See classified file AT-FINAL-042986 for complete details.*
+
+---
+
+## 🎧 UKRAINIAN AUDIO RECORDINGS
+
+### Plant Worker Emergency Log
+> "It didn't melt down. It cracked *open*.  
+> The heat was just the excuse — the real fire came from whatever was behind that air.  
+> I swear I saw a second city behind Pripyat for a second. Like it was being remembered too loudly."
+
+[AUDIO:chernobyl-incident_heat-was-just-the-excuse.mp3:Plant Worker Emergency Log - "The heat was just the excuse":field-recording]
+
+### Site Log Recording
+> "We didn't have time to evacuate. It didn't want to be evacuated."  
+> – Anonymous Bureau asset, debriefed under amnestic protocol
+
+[AUDIO:chernobyl-incident_didnt-have-time-to-evacuate.mp3:Site Log Recording - "We didn't have time to evacuate":field-recording]
+
+### Field Observation
+[AUDIO:chernobyl-incident_second-city-behind-pripyat.mp3:Site Log Recording - "Second city behind Pripyat":field-recording]
 
 ---
 
@@ -67,6 +105,8 @@ Civilians later report:
 
 > Three Bureau agents embedded in Soviet response team were later declared **"temporally dislocated"** — their bodies were recovered in 1993, unchanged.
 
+<span style="color: transparent;">Agent Thatcher's final transmission was received seven years after he disappeared. The signal contained references to a "second city" and direct contact with the Numbers Fiend. Search for "AT-FINAL-042986" to access the classified transmission log.</span>
+
 ---
 
 ## 🗝️ CLASSIFIED CONNECTIONS
@@ -77,19 +117,6 @@ Civilians later report:
 | **Almaz Echo** | Subharmonic signal detected 10 minutes prior to explosion, broadcast again on 2013 satellite ping |
 | **Rift Observatory** | Reactor logs mimic “3:11 AM” silence frequency spike from 1967 Antarctica incident |
 | **Serum X-7** | One missing Soviet scientist (Dr. A. Vronsky) previously worked on biochemical Rift adaptation project under Project BLACKGATE |
-
----
-
-## 🧾 FIELD REPORT – AGENT THATCHER (CLASSIFIED LOG 04/29/86)
-
-> "It didn't melt down. It cracked *open*.  
-> The heat was just the excuse — the real fire came from whatever was behind that air.  
-
-[AUDIO:chernobyl-incident_heat-was-just-the-excuse.mp3:Site Log Recording - "The heat was just the excuse":field-recording]
-
-> I swear I saw a second city behind Pripyat for a second. Like it was being remembered too loudly."
-
-[AUDIO:chernobyl-incident_second-city-behind-pripyat.mp3:Site Log Recording - "Second city behind Pripyat":field-recording]
 
 ---
 

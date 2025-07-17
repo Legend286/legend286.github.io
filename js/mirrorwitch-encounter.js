@@ -8,6 +8,7 @@ export class MirrorwitchEncounter {
         this.audioContext = null;
         this.whisperAudio = null;
         this.encounterStartTime = null;
+        this.audioInitialized = false;
     }
 
     async initialize() {
@@ -16,12 +17,22 @@ export class MirrorwitchEncounter {
             this.normalImage = await this.loadImage('assets/easter-eggs/mirrorwitch/mirrorwitch_normal.png');
             this.scaryImage = await this.loadImage('assets/easter-eggs/mirrorwitch/mirrorwitch_scary.png');
             
-            // Initialize audio context for creepy effects
-            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            
             console.log('🪞 Mirrorwitch encounter system initialized');
         } catch (error) {
             console.error('❌ Failed to initialize Mirrorwitch encounter:', error);
+        }
+    }
+
+    // Lazy initialize audio context only when needed
+    initializeAudioContext() {
+        if (this.audioInitialized) return;
+        
+        try {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            this.audioInitialized = true;
+            console.log('🪞 Audio context initialized for Mirrorwitch encounter');
+        } catch (error) {
+            console.error('❌ Failed to initialize audio context:', error);
         }
     }
 
@@ -133,10 +144,10 @@ export class MirrorwitchEncounter {
         // Play creepy audio
         this.playCreepyAudio();
         
-        // Switch back after 0.05 seconds
+        // Switch back after 0.125 seconds
         setTimeout(() => {
             this.imageElement.src = this.normalImage.src;
-        }, 50);
+        }, 125);
     }
 
     startCreepyAudio() {
@@ -152,39 +163,37 @@ export class MirrorwitchEncounter {
     }
 
     createWhisperEffect() {
+        // Initialize audio context if needed
+        this.initializeAudioContext();
+        if (!this.audioContext) return;
         // Create subtle reversed audio effect
         const oscillator = this.audioContext.createOscillator();
         const gainNode = this.audioContext.createGain();
-        
         oscillator.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
-        
         // Very subtle, barely audible
         oscillator.frequency.setValueAtTime(200, this.audioContext.currentTime);
         oscillator.type = 'sine';
-        
         gainNode.gain.setValueAtTime(0.01, this.audioContext.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 2);
-        
         oscillator.start();
         oscillator.stop(this.audioContext.currentTime + 2);
     }
 
     playCreepyAudio() {
+        // Initialize audio context if needed
+        this.initializeAudioContext();
+        if (!this.audioContext) return;
         // Play brief reversed whisper
         const oscillator = this.audioContext.createOscillator();
         const gainNode = this.audioContext.createGain();
-        
         oscillator.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
-        
         // Reverse-like effect
         oscillator.frequency.setValueAtTime(800, this.audioContext.currentTime);
         oscillator.frequency.exponentialRampToValueAtTime(200, this.audioContext.currentTime + 0.3);
-        
         gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.3);
-        
         oscillator.start();
         oscillator.stop(this.audioContext.currentTime + 0.3);
     }
@@ -202,25 +211,23 @@ export class MirrorwitchEncounter {
     }
 
     playStaticBurst() {
+        // Initialize audio context if needed
+        this.initializeAudioContext();
+        if (!this.audioContext) return;
         // Create static noise burst
         const bufferSize = this.audioContext.sampleRate * 0.1; // 0.1 seconds
         const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
         const output = buffer.getChannelData(0);
-        
         for (let i = 0; i < bufferSize; i++) {
             output[i] = Math.random() * 2 - 1;
         }
-        
         const source = this.audioContext.createBufferSource();
         source.buffer = buffer;
-        
         const gainNode = this.audioContext.createGain();
         gainNode.gain.setValueAtTime(0.05, this.audioContext.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.1);
-        
         source.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
-        
         source.start();
     }
 
